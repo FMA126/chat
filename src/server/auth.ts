@@ -46,8 +46,8 @@ export const authOptions: NextAuthOptions = {
     //   },
     // }),
     signIn: ({ account, profile }) => {
-      if (account.provider === "google") {
-        return profile.email_verified && profile.email.endsWith("@example.com");
+      if (account && account.provider === "google") {
+        return true; // Do different verification for other providers that don't have `email_verified`
       }
       return true; // Do different verification for other providers that don't have `email_verified`
     },
