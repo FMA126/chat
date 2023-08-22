@@ -68,3 +68,42 @@ model VerificationToken {
 
     @@unique([identifier, token])
 }
+
+model Game {
+  id Int @id @default(autoincrement())
+  playerOne  String
+  playerTwo String
+  playerThree String
+  playerFour String
+  playerFive String
+  gameState String
+  winner String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ScoreCard {
+    id        Int   @id @default(autoincrement())
+    player String
+    scoreCardEntries ScoreCardEntry[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model ScoreCardEntry {
+    id        Int   @id @default(autoincrement())
+    scoreCardId Int
+    redRow Int
+    blueRow Int
+    yellowRow Int
+    greenRow Int
+    penaltyOne Int
+    penaltyTwo Int
+    penaltyThree Int
+    penaltyFour Int
+    scoreCard ScoreCard @relation(fields: [scoreCardId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([scoreCardId])
+}
