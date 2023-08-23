@@ -1,7 +1,7 @@
 import { api } from "~/utils/api";
 
 export default function NewGame() {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
+  const startNewGame = api.newGame.createNewGame.useQuery();
 
   return <div>New Game</div>;
 }
