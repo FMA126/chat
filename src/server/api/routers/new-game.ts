@@ -10,12 +10,6 @@ export const newGameRouter = createTRPCRouter({
     const newGame = await ctx.prisma.game.create({
       data: {
         playerOne: ctx.session.user.id,
-        playerTwo: null,
-        playerThree: null,
-        playerFour: null,
-        playerFive: null,
-        gameState: null,
-        winner: null,
       },
     });
     const game =
