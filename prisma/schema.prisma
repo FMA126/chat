@@ -72,7 +72,7 @@ model VerificationToken {
 model Game {
   id Int @id @default(autoincrement())
   playerOne  String
-  playerTwo String?
+  // playerTwo String?
   playerThree String?
   playerFour String?
   playerFive String?
@@ -80,14 +80,20 @@ model Game {
   winner String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  scoreCards ScoreCard[]
 }
 
 model ScoreCard {
     id        Int   @id @default(autoincrement())
+    gameId Int
+    game Game @relation(fields: [gameId], references: [id])
     player String
     scoreCardEntries ScoreCardEntry[]
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@index([gameId])
 }
 
 model ScoreCardEntry {

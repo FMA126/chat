@@ -6,10 +6,16 @@ import {
 } from "~/server/api/trpc";
 
 export const newGameRouter = createTRPCRouter({
-  createNewGame: protectedProcedure.query(async ({ ctx }) => {
+  createNewGame: protectedProcedure.mutation(async ({ ctx }) => {
     const newGame = await ctx.prisma.game.create({
       data: {
         playerOne: ctx.session.user.id,
+        playerTwo: null,
+        playerThree: null,
+        playerFour: null,
+        playerFive: null,
+        gameState: null,
+        winner: null,
       },
     });
     const game =
