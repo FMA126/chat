@@ -1,7 +1,9 @@
 import { TRPCClientError } from "@trpc/client";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { api } from "~/utils/api";
+import { AuthShowcase } from "..";
 
 export default function NewGame() {
   const router = useRouter();
@@ -17,12 +19,16 @@ export default function NewGame() {
       onSuccess() {
         toast.success("Game created successfully");
       },
-      async onSettled() {
-        const data = utils.game.byId.getData();
-        data && (await router.push(`/${data.id}`));
-      },
     }
   );
+
+  if (error) {
+    return <AuthShowcase />;
+  }
+
+  if (data) {
+    void router.push(`game/${data.id}`);
+  }
 
   const handleStartGame = () => {
     mutate();
