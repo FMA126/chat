@@ -1,21 +1,38 @@
+import { TRPCClientError } from "@trpc/client";
+import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import { api } from "~/utils/api";
 
 export default function NewGame() {
-  const startNewGame = api.newGame.createNewGame.useMutation();
+  const router = useRouter();
+  const utils = api.useContext();
+  const { mutate, error, data, isLoading } = api.game.createNewGame.useMutation(
+    {
+      // async onMutate() {
+
+      // },
+      onError() {
+        toast.error("Error starting game");
+      },
+      onSuccess() {
+        toast.success("Game created successfully");
+      },
+      async onSettled() {
+        const data = utils.game.byId.getData();
+        data && (await router.push(`/${data.id}`));
+      },
+    }
+  );
 
   const handleStartGame = () => {
-    startNewGame.mutate();
-    toast.success("Game created successfully");
-
-    // toast.error("Error starting game");
+    mutate();
   };
 
   return (
     <div>
       <h2>New Game</h2>
       <button onClick={handleStartGame}>Start Game</button>
-      <div>{startNewGame.data && startNewGame.data.id}</div>
+      {isLoading ? <div>loading...</div> : <div>{data?.id}</div>}
     </div>
   );
 }
