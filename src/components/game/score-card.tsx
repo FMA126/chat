@@ -5,7 +5,7 @@ import { useState } from "react";
 export const ScoreCard = () => {
   return (
     <>
-      <div className="bg-[#dddddf] pr-4">
+      <div className="bg-[#dddddf] px-4">
         <div className="flex justify-end pr-4">
           <div className="rounded-t-lg border-l-2 border-r-2 border-t-2 border-black p-2">
             At least 5 X&apos;s
