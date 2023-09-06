@@ -36,8 +36,12 @@ export default function NewGame() {
 
   return (
     <div>
-      <h2>New Game</h2>
-      <button onClick={handleStartGame}>Start Game</button>
+      <button
+        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+        onClick={handleStartGame}
+      >
+        Start Game
+      </button>
       {isLoading ? <div>loading...</div> : <div>{data?.id}</div>}
     </div>
   );
