@@ -33,51 +33,51 @@ const ScoreCardLegendPenaltyRow = () => {
         </div>
         <div className="text-center">points</div>
       </div>
-      <div className="grid min-w-[30px] grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
+      <div className="grid grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
         <div className="text-center">1x</div>
         <div className="text-center">1</div>
       </div>
-      <div className="grid min-w-[30px] grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
+      <div className="grid grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
         <div className="text-center">2x</div>
         <div className="text-center">3</div>
       </div>
-      <div className="grid min-w-[30px] grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
+      <div className="grid grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
         <div className="text-center">3x</div>
         <div className="text-center">6</div>
       </div>
-      <div className="grid min-w-[30px] grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
+      <div className="grid grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
         <div className="text-center">4x</div>
         <div className="text-center">10</div>
       </div>
-      <div className="grid min-w-[30px] grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
+      <div className="grid grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
         <div className="text-center">5x</div>
         <div className="text-center">15</div>
       </div>
-      <div className="grid min-w-[30px] grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
+      <div className="grid grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
         <div className="text-center">6x</div>
         <div className="text-center">21</div>
       </div>
-      <div className="grid min-w-[30px] grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
+      <div className="grid grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
         <div className="text-center">7x</div>
         <div className="text-center">28</div>
       </div>
-      <div className="grid min-w-[30px] grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
+      <div className="grid grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
         <div className="text-center">8x</div>
         <div className="text-center">36</div>
       </div>
-      <div className="grid min-w-[30px] grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
+      <div className="grid grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
         <div className="text-center">9x</div>
         <div className="text-center">45</div>
       </div>
-      <div className="grid min-w-[30px] grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
+      <div className="grid grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
         <div className="text-center">10x</div>
         <div className="text-center">55</div>
       </div>
-      <div className="grid min-w-[30px] grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
+      <div className="grid grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
         <div className="text-center">11x</div>
         <div className="text-center">66</div>
       </div>
-      <div className="grid min-w-[30px] grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
+      <div className="grid grid-cols-1 divide-y divide-black rounded-lg border-2 border-black">
         <div className="text-center">12x</div>
         <div className="text-center">78</div>
       </div>

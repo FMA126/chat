@@ -1,1 +1,2 @@
-export const joinClassNames = (...args: string[]) => args.join(" ");
+export const joinClassNames = (...classes: (string | undefined)[]) =>
+  classes.filter(Boolean).join("");
