@@ -1,9 +1,15 @@
+import { DiceRoll } from "./dice-roll";
+import { OpponentsScoreCards } from "./opponents-score-cards";
 import { ScoreCard } from "./score-card";
 
 export const GameWindow = () => {
   return (
     <div>
-      <ScoreCard />
+      <DiceRoll />
+      <OpponentsScoreCards />
+      <div className="">
+        <ScoreCard />
+      </div>
     </div>
   );
 };

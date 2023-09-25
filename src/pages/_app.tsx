@@ -3,7 +3,6 @@ import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
 import { api } from "~/utils/api";
 import "~/styles/globals.css";
-import { MainLayout } from "~/components/layout/main-layout";
 import { Toaster } from "react-hot-toast";
 
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -28,9 +27,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
           },
         }}
       />
-      <MainLayout>
-        <Component {...pageProps} />
-      </MainLayout>
+
+      <Component {...pageProps} />
     </SessionProvider>
   );
 };

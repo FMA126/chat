@@ -15,11 +15,11 @@ export const ScoreCard = () => {
         <ScoreCardRow color="yellow" />
         <ScoreCardRow color="green" />
         <ScoreCardRow color="blue" />
-        <ScoreCardLegendPenaltyRow />
+        {/* <ScoreCardLegendPenaltyRow /> */}
       </div>
-      <div className="bg-[#aaa9af] p-4">
+      {/* <div className="bg-[#aaa9af] p-4">
         <ScoreCardTotalRow />
-      </div>
+      </div> */}
     </>
   );
 };
@@ -144,31 +144,37 @@ const ScoreCardRow = ({ color }: { color: string }) => {
   const [isClosedOut, setIsClosedOut] = useState(false);
   return (
     <div
-      className={joinClassNames(colorSwitch(color), "flex items-center p-4")}
+      className={joinClassNames(
+        colorSwitch(color),
+        "flex items-center p-2 md:p-4"
+      )}
     >
-      <PlayIcon className="h-6 text-black" />
-
-      {row.map((box, boxIdx) => (
-        <div className={joinClassNames(borderBoxColor(color))} key={boxIdx}>
-          <div
-            className={joinClassNames(
-              innerBoxColor(color),
-              "min-w-[49px] rounded-lg p-4 text-center"
-            )}
-          >
-            {box}
+      <PlayIcon className="h-6 w-6 text-black" />
+      {/* <div className="flex">
+        {row.map((box, boxIdx) => (
+          <div className={joinClassNames(borderBoxColor(color))} key={boxIdx}>
+            <div
+              className={joinClassNames(
+                innerBoxColor(color),
+                "rounded-lg p-4 text-center"
+              )}
+            >
+              {box}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div> */}
 
-      <div
+      {/* <div
         className={joinClassNames(
           innerBoxColor(color),
           "ml-2 rounded-full p-4"
         )}
       >
-        <LockClosedIcon className={joinClassNames(iconColor(color), "h-6")} />
-      </div>
+        <LockClosedIcon
+          className={joinClassNames(iconColor(color), "h-6 h-6")}
+        />
+      </div> */}
     </div>
   );
 };

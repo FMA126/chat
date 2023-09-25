@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { api } from "~/utils/api";
 import { AuthShowcase } from "..";
+import { GameLayout } from "~/components/layout/game-layout";
 
 export default function NewGame() {
   const router = useRouter();
@@ -35,14 +36,16 @@ export default function NewGame() {
   };
 
   return (
-    <div>
-      <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={handleStartGame}
-      >
-        Start Game
-      </button>
-      {isLoading ? <div>loading...</div> : <div>{data?.id}</div>}
-    </div>
+    <GameLayout>
+      <div className="flex h-screen flex-col items-center justify-center">
+        <button
+          className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+          onClick={handleStartGame}
+        >
+          Start Game
+        </button>
+        {isLoading ? <div>loading...</div> : <div>{data?.id}</div>}
+      </div>
+    </GameLayout>
   );
 }
