@@ -1,14 +1,20 @@
 import { DiceRoll } from "./dice-roll";
-import { OpponentsScoreCards } from "./opponents-score-cards";
+import { GameNav } from "./game-nav";
 import { ScoreCard } from "./score-card";
 
 export const GameWindow = () => {
   return (
-    <div>
-      <DiceRoll />
-      <OpponentsScoreCards />
-      <div className="">
-        <ScoreCard />
+    <div className="">
+      <div className="flex min-h-screen flex-col">
+        <div className="">
+          <DiceRoll />
+        </div>
+        <div className="">
+          <GameNav />
+        </div>
+        <div className="grow p-2">
+          <ScoreCard />
+        </div>
       </div>
     </div>
   );
