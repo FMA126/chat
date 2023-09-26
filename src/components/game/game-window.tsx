@@ -12,7 +12,7 @@ export const GameWindow = () => {
         <div className="">
           <GameNav />
         </div>
-        <div className="grow p-2">
+        <div className="p-2">
           <ScoreCard />
         </div>
       </div>

@@ -72,7 +72,7 @@ model VerificationToken {
 model Game {
   id Int @id @default(autoincrement())
   playerOne  String
-  // playerTwo String?
+  playerTwo String?
   playerThree String?
   playerFour String?
   playerFive String?
@@ -81,6 +81,7 @@ model Game {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
+  diceRolls Dice[]
   scoreCards ScoreCard[]
 }
 
@@ -112,4 +113,20 @@ model ScoreCardEntry {
     updatedAt DateTime @updatedAt
 
     @@index([scoreCardId])
+}
+
+model Dice {
+    id        Int   @id @default(autoincrement())
+    gameId Int
+    whiteOne Int
+    whiteTwo Int
+    green Int
+    red Int
+    yellow Int
+    blue Int
+    game Game @relation(fields: [gameId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([gameId])
 }

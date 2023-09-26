@@ -6,8 +6,8 @@ export const ScoreCard = () => {
   return (
     <>
       <div className="container mx-auto bg-[#dddddf] p-1">
-        <div className="flex justify-end pr-4">
-          <div className="rounded-t-lg border-l-2 border-r-2 border-t-2 border-black p-2">
+        <div className="flex justify-end">
+          <div className="w-16 rounded-t-lg border-l-2 border-r-2 border-t-2 border-black sm:w-24 md:w-40 lg:w-64">
             At least 5 X&apos;s
           </div>
         </div>

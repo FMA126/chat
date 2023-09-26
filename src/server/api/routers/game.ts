@@ -5,6 +5,7 @@ import {
   publicProcedure,
   protectedProcedure,
 } from "~/server/api/trpc";
+import { randomDiceRoll } from "~/utils/randomDiceRoll";
 
 const defaultGameSelect = Prisma.validator<Prisma.GameSelect>()({
   id: true,
@@ -24,7 +25,7 @@ export const gameRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
       const { id } = input;
-      return ctx.prisma.game.findUnique({
+      return await ctx.prisma.game.findUnique({
         where: { id: +id },
         select: defaultGameSelect,
       });
@@ -32,4 +33,41 @@ export const gameRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.prisma.game.findMany();
   }),
+  rollDice: protectedProcedure
+    .input(z.object({ gameId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const randomRoll = randomDiceRoll();
+      const newDiceRoll = await ctx.prisma.dice.create({
+        data: {
+          gameId: +input.gameId,
+          whiteOne: randomRoll.whiteOne,
+          whiteTwo: randomRoll.whiteTwo,
+          green: randomRoll.green,
+          red: randomRoll.red,
+          yellow: randomRoll.yellow,
+          blue: randomRoll.blue,
+        },
+        select: {
+          id: true,
+          gameId: true,
+          whiteOne: true,
+          whiteTwo: true,
+          green: true,
+          red: true,
+          yellow: true,
+          blue: true,
+        },
+      });
+
+      return newDiceRoll;
+    }),
+  getDiceRoll: protectedProcedure
+    .input(z.object({ gameId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const { gameId } = input;
+      return await ctx.prisma.dice.findMany({
+        where: { gameId: +gameId },
+        orderBy: { id: "desc" },
+      });
+    }),
 });
