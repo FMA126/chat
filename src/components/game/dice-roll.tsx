@@ -9,25 +9,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/router";
+import { useCallback } from "react";
 import toast from "react-hot-toast";
 import { api } from "~/utils/api";
-
-const diceNumber = (rolledNumber: number) => {
-  switch (rolledNumber) {
-    case 1:
-      return faDiceOne;
-    case 2:
-      return faDiceTwo;
-    case 3:
-      return faDiceThree;
-    case 4:
-      return faDiceFour;
-    case 5:
-      return faDiceFive;
-    case 6:
-      return faDiceSix;
-  }
-};
 
 export function DiceRoll() {
   const router = useRouter();
@@ -45,6 +29,22 @@ export function DiceRoll() {
       await refetch();
     },
   });
+  const diceNumber = useCallback((rolledNumber: number) => {
+    switch (rolledNumber) {
+      case 1:
+        return faDiceOne;
+      case 2:
+        return faDiceTwo;
+      case 3:
+        return faDiceThree;
+      case 4:
+        return faDiceFour;
+      case 5:
+        return faDiceFive;
+      case 6:
+        return faDiceSix;
+    }
+  }, []);
 
   const handleRollDice = () => {
     mutate({ gameId: router.query.gid as string });
@@ -114,8 +114,8 @@ export function DiceRoll() {
 
   if (!dice)
     return (
-      <div>
-        {" "}
+      <div className="flex flex-col items-center">
+        <h2>Roll to start game</h2>
         <button
           className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900"
           onClick={handleRollDice}
