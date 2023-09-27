@@ -6,7 +6,7 @@ import { ScoreCard } from "./score-card";
 export const GameWindow = () => {
   return (
     <div className="">
-      <div className="flex min-h-screen flex-col justify-between">
+      <div className="flex flex-col justify-between">
         <div className="">
           <GameNav />
         </div>

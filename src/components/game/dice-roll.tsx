@@ -52,7 +52,65 @@ export function DiceRoll() {
 
   if (error) return <div>Error getting dice</div>;
 
-  if (isLoading) return <div>...loading</div>;
+  if (isLoading)
+    return (
+      <>
+        <div className="flex justify-center">
+          <div className="flex max-w-2xl gap-2">
+            <div className="">
+              <FontAwesomeIcon
+                icon={faDice}
+                className="h-14 w-14 bg-black text-white"
+              />
+            </div>
+            <div className="">
+              <FontAwesomeIcon
+                icon={faDice}
+                className="h-14 w-14 bg-black text-white"
+              />
+            </div>
+            <div className="">
+              <FontAwesomeIcon
+                icon={faDice}
+                className="h-14 w-14 bg-white text-[#e00000]"
+              />
+            </div>
+            <div className="">
+              <FontAwesomeIcon
+                icon={faDice}
+                className="h-14 w-14 bg-white text-[#fdc800]"
+              />
+            </div>
+            <div className="">
+              <FontAwesomeIcon
+                icon={faDice}
+                className="h-14 w-14 bg-white text-[#319800]"
+              />
+            </div>
+            <div className="">
+              <FontAwesomeIcon
+                icon={faDice}
+                className="h-14 w-14 bg-white text-[#326698]"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-center">
+          <button
+            className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900 active:bg-cyan-100"
+            onClick={handleRollDice}
+            disabled={true}
+          >
+            <FontAwesomeIcon
+              icon={faDice}
+              spin
+              className="h-6 w-6 pr-2 text-white"
+            />
+            Roll
+          </button>
+        </div>
+      </>
+    );
 
   if (!dice)
     return (
@@ -70,51 +128,55 @@ export function DiceRoll() {
 
   return (
     <>
-      <div className="flex">
-        <div className="grow">
-          <FontAwesomeIcon
-            icon={diceNumber(dice.whiteOne) ?? faDice}
-            className="h-14 w-14 bg-black text-white"
-          />
-        </div>
-        <div className="grow">
-          <FontAwesomeIcon
-            icon={diceNumber(dice.whiteTwo) ?? faDice}
-            className="h-14 w-14 bg-black text-white"
-          />
-        </div>
-        <div className="grow">
-          <FontAwesomeIcon
-            icon={diceNumber(dice.red) ?? faDice}
-            className="h-14 w-14 bg-white text-[#e00000]"
-          />
-        </div>
-        <div className="grow">
-          <FontAwesomeIcon
-            icon={diceNumber(dice.yellow) ?? faDice}
-            className="h-14 w-14 bg-white text-[#fdc800]"
-          />
-        </div>
-        <div className="grow">
-          <FontAwesomeIcon
-            icon={diceNumber(dice.green) ?? faDice}
-            className="h-14 w-14 bg-white text-[#319800]"
-          />
-        </div>
-        <div className="grow">
-          <FontAwesomeIcon
-            icon={diceNumber(dice.blue) ?? faDice}
-            className="h-14 w-14 bg-white text-[#326698]"
-          />
+      <div className="flex justify-center">
+        <div className="flex max-w-2xl gap-2">
+          <div className="">
+            <FontAwesomeIcon
+              icon={diceNumber(dice.whiteOne) ?? faDice}
+              className="h-14 w-14 bg-black text-white"
+            />
+          </div>
+          <div className="">
+            <FontAwesomeIcon
+              icon={diceNumber(dice.whiteTwo) ?? faDice}
+              className="h-14 w-14 bg-black text-white"
+            />
+          </div>
+          <div className="">
+            <FontAwesomeIcon
+              icon={diceNumber(dice.red) ?? faDice}
+              className="h-14 w-14 bg-white text-[#e00000]"
+            />
+          </div>
+          <div className="">
+            <FontAwesomeIcon
+              icon={diceNumber(dice.yellow) ?? faDice}
+              className="h-14 w-14 bg-white text-[#fdc800]"
+            />
+          </div>
+          <div className="">
+            <FontAwesomeIcon
+              icon={diceNumber(dice.green) ?? faDice}
+              className="h-14 w-14 bg-white text-[#319800]"
+            />
+          </div>
+          <div className="">
+            <FontAwesomeIcon
+              icon={diceNumber(dice.blue) ?? faDice}
+              className="h-14 w-14 bg-white text-[#326698]"
+            />
+          </div>
         </div>
       </div>
-      <button
-        className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900"
-        onClick={handleRollDice}
-      >
-        <FontAwesomeIcon icon={faDice} className="h-6 w-6 pr-2 text-white" />
-        Roll
-      </button>
+      <div className="flex justify-center">
+        <button
+          className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900 active:bg-cyan-100"
+          onClick={handleRollDice}
+        >
+          <FontAwesomeIcon icon={faDice} className="h-6 w-6 pr-2 text-white" />
+          Roll
+        </button>
+      </div>
     </>
   );
 }
