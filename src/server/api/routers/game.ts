@@ -69,7 +69,7 @@ export const gameRouter = createTRPCRouter({
     .input(z.object({ gameId: z.string() }))
     .query(async ({ input, ctx }) => {
       const { gameId } = input;
-      return await ctx.prisma.diceRoll.findMany({
+      return await ctx.prisma.diceRoll.findFirst({
         where: { gameId: +gameId },
         orderBy: { id: "desc" },
       });
