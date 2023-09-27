@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { DiceRoll } from "./dice-roll";
 import { GameNav } from "./game-nav";
-import { Opponents } from "./opponents";
+import { ScoreCardViewSelect } from "./score-card-view-select";
 import { ScoreCard } from "./score-card";
 
 export const GameWindow = () => {
+  const [cardView, setCardView] = useState("myCard");
   return (
     <div className="">
       <div className="flex flex-col justify-between">
@@ -17,7 +19,7 @@ export const GameWindow = () => {
           <ScoreCard />
         </div>
         <div>
-          <Opponents />
+          <ScoreCardViewSelect setCardView={setCardView} />
         </div>
       </div>
     </div>

@@ -7,7 +7,7 @@ export const ScoreCard = () => {
     <>
       <div className="container mx-auto bg-[#dddddf] p-1">
         <div className="flex justify-end">
-          <div className="w-16 rounded-t-lg border-l-2 border-r-2 border-t-2 border-black sm:w-24 md:w-40 lg:w-64">
+          <div className="w-1/6 rounded-t-lg border-l-2 border-r-2 border-t-2 border-black">
             At least 5 X&apos;s
           </div>
         </div>

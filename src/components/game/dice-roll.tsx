@@ -60,37 +60,43 @@ export function DiceRoll() {
             <div className="">
               <FontAwesomeIcon
                 icon={faDice}
-                className="h-14 w-14 bg-black text-white"
+                spin
+                className="-black h-14 w-14 text-white"
               />
             </div>
             <div className="">
               <FontAwesomeIcon
                 icon={faDice}
-                className="h-14 w-14 bg-black text-white"
+                spin
+                className="h-14 w-14 text-white"
               />
             </div>
             <div className="">
               <FontAwesomeIcon
                 icon={faDice}
-                className="h-14 w-14 bg-white text-[#e00000]"
+                spin
+                className="h-14 w-14 text-[#e00000]"
               />
             </div>
             <div className="">
               <FontAwesomeIcon
                 icon={faDice}
-                className="h-14 w-14 bg-white text-[#fdc800]"
+                spin
+                className="h-14 w-14 text-[#fdc800]"
               />
             </div>
             <div className="">
               <FontAwesomeIcon
                 icon={faDice}
-                className="h-14 w-14 bg-white text-[#319800]"
+                spin
+                className="h-14 w-14 text-[#319800]"
               />
             </div>
             <div className="">
               <FontAwesomeIcon
                 icon={faDice}
-                className="h-14 w-14 bg-white text-[#326698]"
+                spin
+                className="h-14 w-14 text-[#326698]"
               />
             </div>
           </div>
