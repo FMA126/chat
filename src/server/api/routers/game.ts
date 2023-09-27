@@ -37,9 +37,10 @@ export const gameRouter = createTRPCRouter({
     .input(z.object({ gameId: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const randomRoll = randomDiceRoll();
-      const newDiceRoll = await ctx.prisma.dice.create({
+      const newDiceRoll = await ctx.prisma.diceRoll.create({
         data: {
           gameId: +input.gameId,
+          userId: ctx.session.user.id,
           whiteOne: randomRoll.whiteOne,
           whiteTwo: randomRoll.whiteTwo,
           green: randomRoll.green,
@@ -50,12 +51,15 @@ export const gameRouter = createTRPCRouter({
         select: {
           id: true,
           gameId: true,
+          userId: true,
           whiteOne: true,
           whiteTwo: true,
           green: true,
           red: true,
           yellow: true,
           blue: true,
+          createdAt: true,
+          updatedAt: true,
         },
       });
 
@@ -65,7 +69,7 @@ export const gameRouter = createTRPCRouter({
     .input(z.object({ gameId: z.string() }))
     .query(async ({ input, ctx }) => {
       const { gameId } = input;
-      return await ctx.prisma.dice.findMany({
+      return await ctx.prisma.diceRoll.findMany({
         where: { gameId: +gameId },
         orderBy: { id: "desc" },
       });

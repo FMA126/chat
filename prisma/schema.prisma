@@ -59,6 +59,7 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    diceRolls     DiceRoll[]
 }
 
 model VerificationToken {
@@ -81,7 +82,7 @@ model Game {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  diceRolls Dice[]
+  diceRolls DiceRoll[]
   scoreCards ScoreCard[]
 }
 
@@ -115,9 +116,10 @@ model ScoreCardEntry {
     @@index([scoreCardId])
 }
 
-model Dice {
+model DiceRoll {
     id        Int   @id @default(autoincrement())
     gameId Int
+    userId       String
     whiteOne Int
     whiteTwo Int
     green Int
@@ -125,8 +127,10 @@ model Dice {
     yellow Int
     blue Int
     game Game @relation(fields: [gameId], references: [id])
+    user         User     @relation(fields: [userId], references: [id])
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@index([gameId])
+    @@index([userId])
 }
