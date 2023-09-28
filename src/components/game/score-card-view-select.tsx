@@ -8,25 +8,32 @@ export function ScoreCardViewSelect({
   setCardView: Dispatch<SetStateAction<string>>;
 }) {
   return (
-    <div className="grid grid-cols-5">
+    <div className="container mx-auto flex justify-end gap-1">
+      <div></div>
       <div></div>
       <div></div>
       <div>
-        <button className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900">
+        <button
+          className="rounded-lg border-2 border-solid bg-cyan-300 text-cyan-900"
+          onClick={() => setCardView("myCard")}
+        >
           <FontAwesomeIcon
             icon={faTableList}
-            className="h-6 w-6 pr-2 text-white"
+            className="h-6 w-6 pr-2 text-cyan-900"
           />
-          My Scorecard
+          <span>My Scorecard</span>
         </button>
       </div>
       <div>
-        <button className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900">
+        <button
+          className="inline-block rounded-lg border-2 border-solid bg-cyan-300 text-cyan-900"
+          onClick={() => setCardView("players")}
+        >
           <FontAwesomeIcon
             icon={faPeopleGroup}
-            className="h-6 w-6 pr-2 text-white"
+            className="h-6 w-6 pr-2 text-cyan-900"
           />
-          Players
+          <span>Players</span>
         </button>
       </div>
     </div>

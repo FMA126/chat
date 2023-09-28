@@ -112,7 +112,7 @@ export function DiceRoll() {
               spin
               className="h-6 w-6 pr-2 text-white"
             />
-            Roll
+            <span>Roll</span>
           </button>
         </div>
       </>
@@ -127,7 +127,7 @@ export function DiceRoll() {
           onClick={handleRollDice}
         >
           <FontAwesomeIcon icon={faDice} className="h-6 w-6 pr-2 text-white" />
-          Roll
+          <span>Roll</span>
         </button>
       </div>
     );
@@ -174,13 +174,13 @@ export function DiceRoll() {
           </div>
         </div>
       </div>
-      <div className="flex justify-center">
+      <div className="flex items-center justify-center">
         <button
           className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900 active:bg-cyan-100"
           onClick={handleRollDice}
         >
           <FontAwesomeIcon icon={faDice} className="h-6 w-6 pr-2 text-white" />
-          Roll
+          <span>Roll</span>
         </button>
       </div>
     </>

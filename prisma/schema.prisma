@@ -60,6 +60,7 @@ model User {
     accounts      Account[]
     sessions      Session[]
     diceRolls     DiceRoll[]
+    scoreCards    ScoreCard[]
 }
 
 model VerificationToken {
@@ -89,13 +90,15 @@ model Game {
 model ScoreCard {
     id        Int   @id @default(autoincrement())
     gameId Int
+    userId       String
     game Game @relation(fields: [gameId], references: [id])
-    player String
+    user         User     @relation(fields: [userId], references: [id])
     scoreCardEntries ScoreCardEntry[]
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@index([gameId])
+    @@index([userId])
 }
 
 model ScoreCardEntry {

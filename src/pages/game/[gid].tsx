@@ -3,39 +3,53 @@ import { useRouter } from "next/router";
 import { api } from "~/utils/api";
 
 import { GameWindow } from "~/components/game/game-window";
-import { joinClassNames } from "~/utils/joinClassNames";
-import { Fragment } from "react";
-import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+
+import { useEffect } from "react";
+
 import { AuthShowcase } from "..";
 import { GameLayout } from "~/components/layout/game-layout";
-
-const user = {
-  name: "Tom Cook",
-  email: "tom@example.com",
-  imageUrl:
-    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-};
-const navigation = [
-  { name: "Dashboard", href: "#", current: true },
-  { name: "Team", href: "#", current: false },
-  { name: "Projects", href: "#", current: false },
-  { name: "Calendar", href: "#", current: false },
-  { name: "Reports", href: "#", current: false },
-];
-const userNavigation = [
-  { name: "Your Profile", href: "#" },
-  { name: "Settings", href: "#" },
-  { name: "Sign out", href: "#" },
-];
+import toast from "react-hot-toast";
 
 export default function Game() {
   const router = useRouter();
-  // const hello = api.example.hello.useQuery({ text: "from tRPC" });
+  const { data: game } = api.game.byId.useQuery(
+    {
+      id: router.query.gid as string,
+    },
+    { enabled: !!router.query.gid }
+  );
+  const { mutate, error, data, isLoading } =
+    api.game.createNewScoreCard.useMutation({
+      onError() {
+        toast.error("Error creating score card");
+      },
+      onSuccess() {
+        toast.success("successfully created score card");
+      },
+    });
   const { data: session } = useSession();
 
+  useEffect(() => {
+    if (
+      game?.id &&
+      game?.playerOne !== session?.user?.id &&
+      game?.playerTwo !== session?.user?.id &&
+      game?.playerThree !== session?.user?.id &&
+      game?.playerFour !== session?.user?.id &&
+      game?.playerFive !== session?.user?.id
+    ) {
+      mutate({ gameId: `${game?.id}` });
+    }
+  }, [game?.id]);
+
   if (!session) {
-    return <AuthShowcase />;
+    return (
+      <GameLayout>
+        <div className="flex h-screen flex-col items-center justify-center">
+          <AuthShowcase />
+        </div>
+      </GameLayout>
+    );
   }
 
   return (
