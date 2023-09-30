@@ -12,17 +12,17 @@ export const GameWindow = () => {
   return (
     <>
       <div className="flex h-screen flex-col justify-between">
-        <div className="">
+        <div className="bg-blue-800">
           <GameNav />
         </div>
         <div className="p-2">
           <DiceRoll />
         </div>
-        <div className="p-2">
+        <div className="max-h-96 grow p-2">
           {cardView === "myCard" ? (
             <ScoreCard playerName={session?.data?.user?.name ?? "no name"} />
           ) : (
-            <div className="h-64 overflow-auto">
+            <div className="max-h-96 overflow-auto">
               <PlayersScoreCards />
             </div>
           )}

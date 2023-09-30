@@ -121,14 +121,16 @@ export function DiceRoll() {
       </>
     );
 
-  if (!dice && gameData)
+  if (!dice)
     return (
       <div className="flex flex-col items-center">
         <h2>Roll to start game</h2>
-        <div>
+        <div className="text-center">
           <span>with</span>
-          <div>
-            {gameData?.scoreCards?.map((card) => card?.user?.name).join(" and")}
+          <div className="text-lg text-slate-100">
+            {gameData?.scoreCards
+              ?.map((card) => card?.user?.name)
+              .join(" and ")}
           </div>
         </div>
         <button

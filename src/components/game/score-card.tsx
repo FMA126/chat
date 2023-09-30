@@ -1,5 +1,5 @@
 import { joinClassNames } from "~/utils/joinClassNames";
-import { LockClosedIcon, PlayIcon } from "@heroicons/react/24/solid";
+import { LockClosedIcon, PlayIcon, UserIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 
@@ -9,7 +9,10 @@ export const ScoreCard = ({ playerName }: { playerName: string }) => {
     <>
       <div className="container mx-auto bg-[#dddddf] p-1">
         <div className="flex justify-between">
-          <div>{playerName ?? "no name"}</div>
+          <div className="flex items-center gap-2">
+            <UserIcon className="h-6 w-6" />
+            <span>{playerName ?? "no name"}</span>
+          </div>
           <div className="w-1/6 rounded-t-lg border-l-2 border-r-2 border-t-2 border-black">
             At least 5 X&apos;s
           </div>
