@@ -12,35 +12,36 @@ import toast from "react-hot-toast";
 
 export default function Game() {
   const router = useRouter();
-  const { data: game } = api.game.byId.useQuery(
+  const { data: game, isFetchedAfterMount } = api.game.byId.useQuery(
     {
       id: router.query.gid as string,
     },
     { enabled: !!router.query.gid }
   );
-  const { mutate, error, data, isLoading } =
-    api.game.createNewScoreCard.useMutation({
+  const { mutateAsync, error, data, isLoading } = api.game.joinGame.useMutation(
+    {
       onError() {
-        toast.error("Error creating score card");
+        toast.error("Error joining game");
       },
       onSuccess() {
-        toast.success("successfully created score card");
+        toast.success("Successfully joined game");
       },
-    });
+    }
+  );
   const { data: session } = useSession();
 
-  useEffect(() => {
+  const joinGame = async () => {
     if (
       game?.id &&
-      game?.playerOne !== session?.user?.id &&
-      game?.playerTwo !== session?.user?.id &&
-      game?.playerThree !== session?.user?.id &&
-      game?.playerFour !== session?.user?.id &&
-      game?.playerFive !== session?.user?.id
+      !Object.values(game)?.find((value) => value === session?.user?.id)
     ) {
-      mutate({ gameId: `${game?.id}` });
+      await mutateAsync({ gameId: `${game?.id}` });
     }
-  }, [game?.id]);
+  };
+
+  useEffect(() => {
+    void joinGame();
+  }, [isFetchedAfterMount]);
 
   if (!session) {
     return (

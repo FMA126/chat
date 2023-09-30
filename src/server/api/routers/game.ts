@@ -14,7 +14,6 @@ export const gameRouter = createTRPCRouter({
   createNewGame: protectedProcedure.mutation(async ({ ctx }) => {
     const newGame = await ctx.prisma.game.create({
       data: {
-        playerOne: ctx.session.user.id,
         gameState: "active",
       },
       select: { id: true },
@@ -25,10 +24,13 @@ export const gameRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
       const { id } = input;
-      return await ctx.prisma.game.findUnique({
+
+      const gameRes = await ctx.prisma.game.findFirstOrThrow({
         where: { id: +id },
-        include: { scoreCards: true },
+        include: { scoreCards: { include: { user: true } } },
       });
+
+      return gameRes;
     }),
   list: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.prisma.game.findMany();
@@ -53,7 +55,7 @@ export const gameRouter = createTRPCRouter({
       const nullPlayer = playerList.find((player) => player[1] === null);
 
       if (nullPlayer) {
-        return await ctx.prisma.game.update({
+        const updatedGame = await ctx.prisma.game.update({
           where: {
             id: +input.gameId,
           },
@@ -61,6 +63,14 @@ export const gameRouter = createTRPCRouter({
             [`${nullPlayer[0]}`]: ctx.session.user.id,
           },
         });
+        await ctx.prisma.scoreCard.create({
+          data: {
+            gameId: game.id,
+            userId: ctx.session.user.id,
+          },
+        });
+        console.log("join game", game, playerList, nullPlayer);
+        return updatedGame;
       }
       return new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -112,7 +122,6 @@ export const gameRouter = createTRPCRouter({
     .input(z.object({ gameId: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const { gameId } = input;
-      console.log("gameId", input.gameId);
       return await ctx.prisma.scoreCard.create({
         data: {
           gameId: +gameId,

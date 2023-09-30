@@ -73,7 +73,7 @@ model VerificationToken {
 
 model Game {
   id Int @id @default(autoincrement())
-  playerOne  String
+  playerOne  String?
   playerTwo String?
   playerThree String?
   playerFour String?

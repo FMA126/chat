@@ -1,12 +1,15 @@
 import { joinClassNames } from "~/utils/joinClassNames";
 import { LockClosedIcon, PlayIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
-export const ScoreCard = () => {
+export const ScoreCard = ({ playerName }: { playerName: string }) => {
+  const session = useSession();
   return (
     <>
       <div className="container mx-auto bg-[#dddddf] p-1">
-        <div className="flex justify-end">
+        <div className="flex justify-between">
+          <div>{playerName ?? "no name"}</div>
           <div className="w-1/6 rounded-t-lg border-l-2 border-r-2 border-t-2 border-black">
             At least 5 X&apos;s
           </div>

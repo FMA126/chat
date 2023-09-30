@@ -18,6 +18,9 @@ export function DiceRoll() {
   const { data: dice, refetch } = api.game.getDiceRoll.useQuery({
     gameId: router.query.gid as string,
   });
+  const { data: gameData } = api.game.byId.useQuery({
+    id: router.query.gid as string,
+  });
   const { mutate, error, data, isLoading } = api.game.rollDice.useMutation({
     // async onMutate() {
 
@@ -118,10 +121,16 @@ export function DiceRoll() {
       </>
     );
 
-  if (!dice)
+  if (!dice && gameData)
     return (
       <div className="flex flex-col items-center">
         <h2>Roll to start game</h2>
+        <div>
+          <span>with</span>
+          <div>
+            {gameData?.scoreCards?.map((card) => card?.user?.name).join(" and")}
+          </div>
+        </div>
         <button
           className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900"
           onClick={handleRollDice}

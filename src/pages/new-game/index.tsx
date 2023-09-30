@@ -28,26 +28,9 @@ export default function NewGame() {
     //   toast.success("Game created successfully");
     // },
   });
-  const {
-    mutate: mutateScoreCard,
-    mutateAsync: mutateScoreCardAsync,
-    error,
-    data,
-    isLoading,
-  } = api.game.createNewScoreCard.useMutation({
-    // async onMutate() {
-    // },
-    // onError() {
-    //   toast.error("Error creating score card");
-    // },
-    // onSuccess() {
-    //   toast.success("Score card created successfully");
-    // },
-  });
 
   const handleStartGame = async () => {
-    const gameRes = await mutateGameAsync();
-    await mutateScoreCardAsync({ gameId: `${gameRes?.id}` });
+    await mutateGameAsync();
   };
 
   const { data: session } = useSession();
@@ -62,7 +45,7 @@ export default function NewGame() {
     );
   }
 
-  if (isGameLoading || isLoading) {
+  if (isGameLoading || isGameLoading) {
     return (
       <GameLayout>
         <div className="flex h-screen flex-col items-center justify-center">
@@ -81,7 +64,7 @@ export default function NewGame() {
     );
   }
 
-  if (error) {
+  if (gameError) {
     return (
       <GameLayout>
         <div className="flex h-screen flex-col items-center justify-center">
@@ -91,8 +74,8 @@ export default function NewGame() {
     );
   }
 
-  if (data) {
-    void router.push(`game/${data.id}`);
+  if (gameData) {
+    void router.push(`game/${gameData.id}`);
   }
 
   return (
@@ -104,7 +87,7 @@ export default function NewGame() {
         >
           Start Game
         </button>
-        {isLoading ? <div>loading...</div> : <div>{data?.id}</div>}
+        {isGameLoading ? <div>loading...</div> : <div>{gameData?.id}</div>}
       </div>
     </GameLayout>
   );

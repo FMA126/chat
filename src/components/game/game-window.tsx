@@ -4,9 +4,11 @@ import { GameNav } from "./game-nav";
 import { ScoreCardViewSelect } from "./score-card-view-select";
 import { ScoreCard } from "./score-card";
 import { PlayersScoreCards } from "./players-score-cards";
+import { useSession } from "next-auth/react";
 
 export const GameWindow = () => {
   const [cardView, setCardView] = useState("myCard");
+  const session = useSession();
   return (
     <>
       <div className="flex h-screen flex-col justify-between">
@@ -18,7 +20,7 @@ export const GameWindow = () => {
         </div>
         <div className="p-2">
           {cardView === "myCard" ? (
-            <ScoreCard />
+            <ScoreCard playerName={session?.data?.user?.name ?? "no name"} />
           ) : (
             <div className="h-64 overflow-auto">
               <PlayersScoreCards />
