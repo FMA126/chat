@@ -12,7 +12,7 @@ export function GameNav() {
       `${
         process.env.NODE_ENV === "development"
           ? "localhost:3000"
-          : process.env.VERCEL_URL
+          : "https://chat-fma126.vercel.app"
       }` + router.asPath
     );
     toast.success("Game link copied!");
