@@ -14,24 +14,24 @@ export function ScoreCardViewSelect({
       <div></div>
       <div>
         <button
-          className="rounded-lg border-2 border-solid bg-cyan-300 text-cyan-900"
+          className="flex items-center gap-2 rounded-lg border-2 border-solid bg-cyan-800 px-4 py-2 text-white active:bg-cyan-500"
           onClick={() => setCardView("myCard")}
         >
           <FontAwesomeIcon
             icon={faTableList}
-            className="h-6 w-6 pr-2 text-cyan-900"
+            className="h-6 w-6 pr-2 text-white"
           />
           <span>My Scorecard</span>
         </button>
       </div>
       <div>
         <button
-          className="inline-block rounded-lg border-2 border-solid bg-cyan-300 text-cyan-900"
+          className="inline-block flex items-center gap-2 rounded-lg border-2 border-solid bg-cyan-800 px-4 py-2 text-white active:bg-cyan-500"
           onClick={() => setCardView("players")}
         >
           <FontAwesomeIcon
             icon={faPeopleGroup}
-            className="h-6 w-6 pr-2 text-cyan-900"
+            className="white h-6 w-6 pr-2"
           />
           <span>Players</span>
         </button>

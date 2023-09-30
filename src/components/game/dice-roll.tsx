@@ -127,7 +127,7 @@ export function DiceRoll() {
         <h2>Roll to start game</h2>
         <div className="text-center">
           <span>with</span>
-          <div className="text-lg text-slate-100">
+          <div className="text-xl text-blue-100">
             {gameData?.scoreCards
               ?.map((card) => card?.user?.name)
               .join(" and ")}

@@ -7,7 +7,7 @@ export const ScoreCard = ({ playerName }: { playerName: string }) => {
   const session = useSession();
   return (
     <>
-      <div className="container mx-auto bg-[#dddddf] p-1">
+      <div className="container mx-auto border-2 border-solid border-black bg-[#dddddf] p-1">
         <div className="flex justify-between">
           <div className="flex items-center gap-2">
             <UserIcon className="h-6 w-6" />
