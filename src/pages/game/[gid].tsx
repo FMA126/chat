@@ -42,21 +42,21 @@ export default function Game() {
   };
 
   useEffect(() => {
-    async function updateGame() {
-      console.log("updateGame");
+    async function updateGame(data: any) {
+      console.log("updateGame", data);
       await refetchGame();
     }
 
-    const channel = game?.id && pusher.subscribe(`game:${game.id}`);
-    channel && channel.bind("player-joined", updateGame);
-    channel && channel.bind("new-dice-roll", updateGame);
-    channel && channel.bind("new-score-card-entry", updateGame);
+    const channel = game?.id && pusher.subscribe(`chat`);
+    channel && channel.bind(`player-joined:game:${game.id}`, updateGame);
+    channel && channel.bind(`new-dice-roll:game:${game.id}`, updateGame);
+    channel && channel.bind(`new-score-card-entry:game:${game.id}`, updateGame);
 
     return () => {
-      channel && channel.unbind("player-joined", updateGame);
-      channel && channel.unbind("new-dice-roll", updateGame);
-      channel && channel.unbind("new-score-card-entry", updateGame);
-      channel && channel.unsubscribe();
+      channel && channel.unbind(`player-joined:game:${game.id}`, updateGame);
+      channel && channel.unbind(`new-dice-roll:game:${game.id}`, updateGame);
+      channel &&
+        channel.unbind(`new-score-card-entry:game:${game.id}`, updateGame);
     };
   }, [pusher, game?.id, refetchGame]);
 

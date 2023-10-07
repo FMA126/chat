@@ -70,9 +70,11 @@ export const gameRouter = createTRPCRouter({
         });
         console.log("join game", game, playerList, nullPlayer);
         await pusherServerClient.trigger(
-          `game${input.gameId}`,
-          "player-joined",
-          {}
+          `chat`,
+          `player-joined:game:${input.gameId}`,
+          {
+            message: "new player joined",
+          }
         );
         return updatedGame;
       }
@@ -110,6 +112,12 @@ export const gameRouter = createTRPCRouter({
           updatedAt: true,
         },
       });
+
+      await pusherServerClient.trigger(
+        "chat",
+        `new-dice-roll:game:${input.gameId}`,
+        { message: "new dice roll" }
+      );
 
       return newDiceRoll;
     }),
