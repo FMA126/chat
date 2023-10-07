@@ -9,6 +9,7 @@ import { api } from "~/utils/api";
 import { useRouter } from "next/router";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import { joinClassNames } from "~/utils/joinClassNames";
+import { GameLayout } from "../layout/game-layout";
 
 export const GameWindow = () => {
   const [cardView, setCardView] = useState("myCard");
@@ -27,6 +28,14 @@ export const GameWindow = () => {
     },
     { enabled: !!router.query.gid }
   );
+  if (!session || !gameData)
+    return (
+      <GameLayout>
+        <div className="flex h-screen flex-col items-center justify-center">
+          ...loading
+        </div>
+      </GameLayout>
+    );
   return (
     <>
       <div className="flex h-screen flex-col">
@@ -54,7 +63,10 @@ export const GameWindow = () => {
         </div>
         <div className="grow p-2">
           {cardView === "myCard" ? (
-            <ScoreCard playerName={session?.data?.user?.name ?? "no name"} />
+            <ScoreCard
+              playerName={session?.data?.user?.name ?? "no name"}
+              playerId={session?.data?.user?.id ?? "-1"}
+            />
           ) : (
             <div className="max-h-96 overflow-auto">
               <PlayersScoreCards />

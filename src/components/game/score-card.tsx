@@ -3,7 +3,13 @@ import { LockClosedIcon, PlayIcon, UserIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 
-export const ScoreCard = ({ playerName }: { playerName: string }) => {
+export const ScoreCard = ({
+  playerName,
+  playerId,
+}: {
+  playerName: string;
+  playerId: string;
+}) => {
   const session = useSession();
   return (
     <>

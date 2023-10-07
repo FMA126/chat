@@ -16,7 +16,10 @@ export function PlayersScoreCards() {
     <>
       {data?.scoreCards?.map((scoreCard, scoreCardIdx) => (
         <div key={scoreCard.user.name}>
-          <ScoreCard playerName={scoreCard.user.name ?? "no name"} />
+          <ScoreCard
+            playerName={scoreCard.user.name ?? "no name"}
+            playerId={scoreCard.user.id}
+          />
         </div>
       ))}
     </>
