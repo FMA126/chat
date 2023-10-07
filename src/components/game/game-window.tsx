@@ -59,7 +59,13 @@ export const GameWindow = () => {
           ))}
         </div>
         <div className="p-2">
-          <DiceRoll />
+          <DiceRoll
+            players={gameData?.scoreCards?.map((card) => ({
+              name: card.user.name,
+              userId: card.user.id,
+              cardId: card.id,
+            }))}
+          />
         </div>
         <div className="grow p-2">
           {cardView === "myCard" ? (

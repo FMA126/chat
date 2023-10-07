@@ -2,6 +2,17 @@ import { joinClassNames } from "~/utils/joinClassNames";
 import { LockClosedIcon, PlayIcon, UserIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { api } from "~/utils/api";
+import { useRouter } from "next/router";
+
+interface Dice {
+  whiteOne: number;
+  whiteTwo: number;
+  green?: number;
+  red?: number;
+  yellow?: number;
+  blue?: number;
+}
 
 export const ScoreCard = ({
   playerName,
@@ -11,12 +22,57 @@ export const ScoreCard = ({
   playerId: string;
 }) => {
   const session = useSession();
+  const router = useRouter();
+  const { data: dice } = api.game.getDiceRoll.useQuery(
+    {
+      gameId: router.query.gid as string,
+    },
+    { enabled: !!router.query.gid }
+  );
+  if (!dice)
+    return (
+      <>
+        <div className="container mx-auto rounded-lg border-2 border-solid border-black bg-[#dddddf]">
+          <div className="p-1">
+            <div className="flex justify-between">
+              <div
+                className={joinClassNames(
+                  session?.data?.user?.id === playerId
+                    ? "rounded-xl bg-green-400 text-xl text-green-900"
+                    : "text-blue-900",
+                  "flex items-center gap-2 p-2"
+                )}
+              >
+                <UserIcon className="h-6 w-6" />
+                <span>{playerName ?? "no name"}</span>
+              </div>
+              <div className="w-1/6 rounded-t-lg border-l-2 border-r-2 border-t-2 border-black">
+                At least 5 X&apos;s
+              </div>
+            </div>
+            <ScoreCardRow color="red" />
+            <ScoreCardRow color="yellow" />
+            <ScoreCardRow color="green" />
+            <ScoreCardRow color="blue" />
+            <ScoreCardLegendPenaltyRow />
+          </div>
+          <ScoreCardTotalRow />
+        </div>
+      </>
+    );
   return (
     <>
       <div className="container mx-auto rounded-lg border-2 border-solid border-black bg-[#dddddf]">
         <div className="p-1">
           <div className="flex justify-between">
-            <div className="flex items-center gap-2">
+            <div
+              className={joinClassNames(
+                session?.data?.user?.id === playerId
+                  ? "rounded-xl bg-purple-300 text-xl text-purple-900"
+                  : "text-blue-900",
+                "flex items-center gap-2 p-2"
+              )}
+            >
               <UserIcon className="h-6 w-6" />
               <span>{playerName ?? "no name"}</span>
             </div>
@@ -24,11 +80,43 @@ export const ScoreCard = ({
               At least 5 X&apos;s
             </div>
           </div>
-          <ScoreCardRow color="red" />
-          <ScoreCardRow color="yellow" />
-          <ScoreCardRow color="green" />
-          <ScoreCardRow color="blue" />
-          <ScoreCardLegendPenaltyRow />
+          <ScoreCardRow
+            isMyCard={session?.data?.user?.id === playerId}
+            dice={{
+              whiteOne: dice.whiteOne,
+              whiteTwo: dice.whiteTwo,
+              red: dice.red,
+            }}
+            color="red"
+          />
+          <ScoreCardRow
+            isMyCard={session?.data?.user?.id === playerId}
+            dice={{
+              whiteOne: dice.whiteOne,
+              whiteTwo: dice.whiteTwo,
+              yellow: dice.yellow,
+            }}
+            color="yellow"
+          />
+          <ScoreCardRow
+            isMyCard={session?.data?.user?.id === playerId}
+            dice={{
+              whiteOne: dice.whiteOne,
+              whiteTwo: dice.whiteTwo,
+              green: dice.green,
+            }}
+            color="green"
+          />
+          <ScoreCardRow
+            isMyCard={session?.data?.user?.id === playerId}
+            dice={{
+              whiteOne: dice.whiteOne,
+              whiteTwo: dice.whiteTwo,
+              blue: dice.blue,
+            }}
+            color="blue"
+          />
+          <ScoreCardLegendPenaltyRow dice={dice} />
         </div>
         <ScoreCardTotalRow />
       </div>
@@ -36,7 +124,51 @@ export const ScoreCard = ({
   );
 };
 
-const ScoreCardLegendPenaltyRow = () => {
+const ScoreCardRow = ({
+  dice,
+  color,
+  isMyCard,
+}: {
+  dice?: Dice;
+  color: string;
+  isMyCard?: boolean;
+}) => {
+  const [row, setRow] = useState(() =>
+    color === "green" || color === "blue"
+      ? [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2]
+      : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  );
+  const [isClosedOut, setIsClosedOut] = useState(false);
+  return (
+    <div className={joinClassNames(colorSwitch(color), "py-2")}>
+      <div className="flex items-center py-1">
+        <PlayIcon className="h-2 w-2 grow text-black md:h-4 lg:h-4" />
+        {row.map((box, boxIdx) => (
+          <div
+            className={joinClassNames(borderBoxColor(color), "grow basis-4")}
+            key={boxIdx}
+          >
+            <div
+              className={joinClassNames(
+                innerBoxColor(color),
+                "rounded-lg text-center md:text-lg lg:text-2xl"
+              )}
+            >
+              {box}
+            </div>
+          </div>
+        ))}
+        <div className={joinClassNames("flex grow justify-center rounded-lg")}>
+          <div className={joinClassNames(innerBoxColor(color), "h-8 w-8 p-1")}>
+            <LockClosedIcon className={joinClassNames(iconColor(color))} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ScoreCardLegendPenaltyRow = ({ dice }: { dice?: Dice }) => {
   return (
     <div className="flex py-2">
       <div className="grid grid-cols-1 divide-y divide-black">
@@ -145,42 +277,6 @@ const ScoreCardTotalRow = () => {
       ></div>
       <div className="">=</div>
       <div className="h-8 w-64 rounded-xl border-2 border-black bg-white"></div>
-    </div>
-  );
-};
-
-const ScoreCardRow = ({ color }: { color: string }) => {
-  const [row, setRow] = useState(() =>
-    color === "green" || color === "blue"
-      ? [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2]
-      : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-  );
-  const [isClosedOut, setIsClosedOut] = useState(false);
-  return (
-    <div className={joinClassNames(colorSwitch(color), "py-2")}>
-      <div className="flex items-center py-1">
-        <PlayIcon className="h-2 w-2 grow text-black md:h-4 lg:h-4" />
-        {row.map((box, boxIdx) => (
-          <div
-            className={joinClassNames(borderBoxColor(color), "grow basis-4")}
-            key={boxIdx}
-          >
-            <div
-              className={joinClassNames(
-                innerBoxColor(color),
-                "rounded-lg text-center md:text-lg lg:text-2xl"
-              )}
-            >
-              {box}
-            </div>
-          </div>
-        ))}
-        <div className={joinClassNames("flex grow justify-center rounded-lg")}>
-          <div className={joinClassNames(innerBoxColor(color), "h-8 w-8 p-1")}>
-            <LockClosedIcon className={joinClassNames(iconColor(color))} />
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

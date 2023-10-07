@@ -50,12 +50,12 @@ export default function Game() {
     const channel = game?.id && pusher.subscribe(`chat`);
 
     channel && channel.bind(`player-joined:game:${game.id}`, updateGame);
-    channel && channel.bind(`new-dice-roll:game:${game.id}`, updateGame);
+
     channel && channel.bind(`new-score-card-entry:game:${game.id}`, updateGame);
 
     return () => {
       channel && channel.unbind(`player-joined:game:${game.id}`, updateGame);
-      channel && channel.unbind(`new-dice-roll:game:${game.id}`, updateGame);
+
       channel &&
         channel.unbind(`new-score-card-entry:game:${game.id}`, updateGame);
       pusher.unsubscribe("chat");

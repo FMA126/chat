@@ -8,14 +8,20 @@ import {
   faDiceTwo,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
 import { usePusher } from "~/lib/usePusherClient";
 import { api } from "~/utils/api";
 
-export function DiceRoll() {
+export function DiceRoll({
+  players,
+}: {
+  players: { name: string | null; userId: string; cardId: number }[];
+}) {
   const pusher = usePusher();
+  const session = useSession();
   const router = useRouter();
   const {
     data: dice,
@@ -24,6 +30,12 @@ export function DiceRoll() {
   } = api.game.getDiceRoll.useQuery(
     {
       gameId: router.query.gid as string,
+    },
+    { enabled: !!router.query.gid }
+  );
+  const { data: game } = api.game.byId.useQuery(
+    {
+      id: router.query.gid as string,
     },
     { enabled: !!router.query.gid }
   );
@@ -41,26 +53,23 @@ export function DiceRoll() {
   });
   useEffect(() => {
     async function updateGame(data: { message: string }) {
-      console.log("updateDiceRoll", data);
       await refetch();
     }
 
-    const channel = router.query.gid && pusher.subscribe(`chat`);
+    const channel = dice && pusher.subscribe(`chat`);
 
     channel &&
-      router.query.gid &&
-      typeof router.query.gid === "string" &&
-      channel.bind(`new-dice-roll:game:${router.query.gid}`, updateGame);
+      dice &&
+      channel.bind(`new-dice-roll:game:${dice.gameId}`, updateGame);
 
     return () => {
       channel &&
-        router.query.gid &&
-        typeof router.query.gid === "string" &&
-        channel.unbind(`new-dice-roll:game:${router.query.gid}`, updateGame);
+        dice &&
+        channel.unbind(`new-dice-roll:game:${dice.gameId}`, updateGame);
 
       pusher.unsubscribe("chat");
     };
-  }, [pusher, router.query.gid, refetch]);
+  }, [pusher, dice?.gameId, refetch]);
   const diceNumber = useCallback((rolledNumber: number) => {
     switch (rolledNumber) {
       case 1:
@@ -153,10 +162,14 @@ export function DiceRoll() {
   if (!dice)
     return (
       <div className="flex flex-col items-center">
-        <h2>Roll to start game</h2>
+        <h2>
+          {players.find((player) => player?.userId === game?.playerOne)?.name}{" "}
+          roll to start game
+        </h2>
         <button
           className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900"
           onClick={handleRollDice}
+          disabled={session?.data?.user?.id !== game?.playerOne}
         >
           <FontAwesomeIcon icon={faDice} className="h-6 w-6 pr-2 text-white" />
           <span>Roll</span>
@@ -210,6 +223,7 @@ export function DiceRoll() {
         <button
           className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900 active:bg-cyan-100"
           onClick={handleRollDice}
+          // disabled={players.findIndex((player) => player.id === dice.userId)}
         >
           <FontAwesomeIcon icon={faDice} className="h-6 w-6 pr-2 text-white" />
           <span>Roll</span>

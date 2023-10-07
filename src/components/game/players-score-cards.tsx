@@ -4,9 +4,12 @@ import { ScoreCard } from "./score-card";
 
 export function PlayersScoreCards() {
   const router = useRouter();
-  const { data, error } = api.game.byId.useQuery({
-    id: router.query.gid as string,
-  });
+  const { data, error } = api.game.byId.useQuery(
+    {
+      id: router.query.gid as string,
+    },
+    { enabled: !!router.query.gid }
+  );
   if (error) return <div>...error</div>;
   if (!data) {
     return <div>...loading players cards</div>;
