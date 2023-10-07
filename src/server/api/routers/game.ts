@@ -1,5 +1,3 @@
-import { Prisma } from "@prisma/client";
-import { TRPCClientError } from "@trpc/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
@@ -8,6 +6,7 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
+import { pusherServerClient } from "~/server/pusher";
 import { randomDiceRoll } from "~/utils/randomDiceRoll";
 
 export const gameRouter = createTRPCRouter({
@@ -70,6 +69,11 @@ export const gameRouter = createTRPCRouter({
           },
         });
         console.log("join game", game, playerList, nullPlayer);
+        await pusherServerClient.trigger(
+          `game${input.gameId}`,
+          "player-joined",
+          {}
+        );
         return updatedGame;
       }
       return new TRPCError({

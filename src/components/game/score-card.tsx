@@ -7,21 +7,23 @@ export const ScoreCard = ({ playerName }: { playerName: string }) => {
   const session = useSession();
   return (
     <>
-      <div className="container mx-auto border-2 border-solid border-black bg-[#dddddf] p-1">
-        <div className="flex justify-between">
-          <div className="flex items-center gap-2">
-            <UserIcon className="h-6 w-6" />
-            <span>{playerName ?? "no name"}</span>
+      <div className="container mx-auto rounded-lg border-2 border-solid border-black bg-[#dddddf]">
+        <div className="p-1">
+          <div className="flex justify-between">
+            <div className="flex items-center gap-2">
+              <UserIcon className="h-6 w-6" />
+              <span>{playerName ?? "no name"}</span>
+            </div>
+            <div className="w-1/6 rounded-t-lg border-l-2 border-r-2 border-t-2 border-black">
+              At least 5 X&apos;s
+            </div>
           </div>
-          <div className="w-1/6 rounded-t-lg border-l-2 border-r-2 border-t-2 border-black">
-            At least 5 X&apos;s
-          </div>
+          <ScoreCardRow color="red" />
+          <ScoreCardRow color="yellow" />
+          <ScoreCardRow color="green" />
+          <ScoreCardRow color="blue" />
+          <ScoreCardLegendPenaltyRow />
         </div>
-        <ScoreCardRow color="red" />
-        <ScoreCardRow color="yellow" />
-        <ScoreCardRow color="green" />
-        <ScoreCardRow color="blue" />
-        <ScoreCardLegendPenaltyRow />
         <ScoreCardTotalRow />
       </div>
     </>
@@ -104,7 +106,7 @@ const ScoreCardLegendPenaltyRow = () => {
 
 const ScoreCardTotalRow = () => {
   return (
-    <div className="flex items-center gap-2 py-2">
+    <div className="flex items-center justify-center gap-2 bg-gray-400 py-2">
       <div className="">totals</div>
       <div
         className={joinClassNames(
