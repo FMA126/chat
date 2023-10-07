@@ -26,7 +26,10 @@ export const gameRouter = createTRPCRouter({
 
       const gameRes = await ctx.prisma.game.findFirstOrThrow({
         where: { id: +id },
-        include: { scoreCards: { include: { user: true } } },
+        include: {
+          scoreCards: { include: { user: true } },
+          diceRolls: { include: { game: true }, orderBy: { id: "desc" } },
+        },
       });
 
       return gameRes;

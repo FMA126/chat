@@ -5,20 +5,54 @@ import { ScoreCardViewSelect } from "./score-card-view-select";
 import { ScoreCard } from "./score-card";
 import { PlayersScoreCards } from "./players-score-cards";
 import { useSession } from "next-auth/react";
+import { api } from "~/utils/api";
+import { useRouter } from "next/router";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { joinClassNames } from "~/utils/joinClassNames";
 
 export const GameWindow = () => {
   const [cardView, setCardView] = useState("myCard");
   const session = useSession();
+  const router = useRouter();
+
+  const { data: gameData } = api.game.byId.useQuery(
+    {
+      id: router.query.gid as string,
+    },
+    { enabled: !!router.query.gid }
+  );
+  const { data: dice } = api.game.getDiceRoll.useQuery(
+    {
+      gameId: router.query.gid as string,
+    },
+    { enabled: !!router.query.gid }
+  );
   return (
     <>
-      <div className="flex h-screen flex-col justify-between">
+      <div className="flex h-screen flex-col">
         <div className="bg-blue-800">
           <GameNav />
+        </div>
+        <div className="flex justify-center bg-white/50 p-2">
+          {gameData?.scoreCards?.map((card) => (
+            <div
+              key={card.user.id}
+              className={joinClassNames(
+                dice?.userId === card.user.id
+                  ? "bg-green-200 text-green-900"
+                  : "text-blue-900",
+                "flex items-center rounded-lg p-1"
+              )}
+            >
+              <UserCircleIcon className="h-6 w-6" />
+              <div className="pl-1 pr-2 text-xl">{card.user.name}</div>
+            </div>
+          ))}
         </div>
         <div className="p-2">
           <DiceRoll />
         </div>
-        <div className="max-h-96 grow p-2">
+        <div className="grow p-2">
           {cardView === "myCard" ? (
             <ScoreCard playerName={session?.data?.user?.name ?? "no name"} />
           ) : (
@@ -27,7 +61,7 @@ export const GameWindow = () => {
             </div>
           )}
         </div>
-        <div className="p-2">
+        <div className="px-2 pb-11">
           <ScoreCardViewSelect setCardView={setCardView} />
         </div>
       </div>

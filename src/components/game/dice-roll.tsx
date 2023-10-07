@@ -9,18 +9,25 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/router";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
+import { usePusher } from "~/lib/usePusherClient";
 import { api } from "~/utils/api";
 
 export function DiceRoll() {
+  const pusher = usePusher();
   const router = useRouter();
-  const { data: dice, refetch } = api.game.getDiceRoll.useQuery({
-    gameId: router.query.gid as string,
-  });
-  const { data: gameData } = api.game.byId.useQuery({
-    id: router.query.gid as string,
-  });
+  const {
+    data: dice,
+    refetch,
+    isFetching,
+  } = api.game.getDiceRoll.useQuery(
+    {
+      gameId: router.query.gid as string,
+    },
+    { enabled: !!router.query.gid }
+  );
+
   const { mutate, error, data, isLoading } = api.game.rollDice.useMutation({
     // async onMutate() {
 
@@ -32,6 +39,28 @@ export function DiceRoll() {
       await refetch();
     },
   });
+  useEffect(() => {
+    async function updateGame(data: { message: string }) {
+      console.log("updateDiceRoll", data);
+      await refetch();
+    }
+
+    const channel = router.query.gid && pusher.subscribe(`chat`);
+
+    channel &&
+      router.query.gid &&
+      typeof router.query.gid === "string" &&
+      channel.bind(`new-dice-roll:game:${router.query.gid}`, updateGame);
+
+    return () => {
+      channel &&
+        router.query.gid &&
+        typeof router.query.gid === "string" &&
+        channel.unbind(`new-dice-roll:game:${router.query.gid}`, updateGame);
+
+      pusher.unsubscribe("chat");
+    };
+  }, [pusher, router.query.gid, refetch]);
   const diceNumber = useCallback((rolledNumber: number) => {
     switch (rolledNumber) {
       case 1:
@@ -55,7 +84,7 @@ export function DiceRoll() {
 
   if (error) return <div>Error getting dice</div>;
 
-  if (isLoading)
+  if (isLoading || isFetching)
     return (
       <>
         <div className="flex justify-center">
@@ -125,14 +154,6 @@ export function DiceRoll() {
     return (
       <div className="flex flex-col items-center">
         <h2>Roll to start game</h2>
-        <div className="text-center">
-          <span>with</span>
-          <div className="text-xl text-blue-100">
-            {gameData?.scoreCards
-              ?.map((card) => card?.user?.name)
-              .join(" and ")}
-          </div>
-        </div>
         <button
           className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900"
           onClick={handleRollDice}
