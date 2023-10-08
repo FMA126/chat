@@ -15,20 +15,14 @@ export const GameWindow = () => {
   const [cardView, setCardView] = useState("myCard");
   const session = useSession();
   const router = useRouter();
-
-  const { data: gameData } = api.game.byId.useQuery(
+  const { data: game } = api.game.byId.useQuery(
     {
       id: router.query.gid as string,
     },
     { enabled: !!router.query.gid }
   );
-  const { data: dice } = api.game.getDiceRoll.useQuery(
-    {
-      gameId: router.query.gid as string,
-    },
-    { enabled: !!router.query.gid }
-  );
-  if (!session || !gameData)
+
+  if (!session || !game)
     return (
       <GameLayout>
         <div className="flex h-screen flex-col items-center justify-center">
@@ -43,11 +37,11 @@ export const GameWindow = () => {
           <GameNav />
         </div>
         <div className="flex justify-center bg-white/50 p-2">
-          {gameData?.scoreCards?.map((card) => (
+          {game?.scoreCards?.map((card) => (
             <div
               key={card.user.id}
               className={joinClassNames(
-                dice?.userId === card.user.id
+                game?.diceRolls[0]?.userId === card.user.id
                   ? "bg-green-200 text-green-900"
                   : "text-blue-900",
                 "flex items-center rounded-lg p-1"
@@ -60,7 +54,7 @@ export const GameWindow = () => {
         </div>
         <div className="p-2">
           <DiceRoll
-            players={gameData?.scoreCards?.map((card) => ({
+            players={game?.scoreCards?.map((card) => ({
               name: card.user.name,
               userId: card.user.id,
               cardId: card.id,
@@ -72,6 +66,7 @@ export const GameWindow = () => {
             <ScoreCard
               playerName={session?.data?.user?.name ?? "no name"}
               playerId={session?.data?.user?.id ?? "-1"}
+              isMyCard={true}
             />
           ) : (
             <div className="max-h-96 overflow-auto">

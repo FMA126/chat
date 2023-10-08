@@ -1,5 +1,11 @@
 import { joinClassNames } from "~/utils/joinClassNames";
-import { LockClosedIcon, PlayIcon, UserIcon } from "@heroicons/react/24/solid";
+import {
+  CheckBadgeIcon,
+  LockClosedIcon,
+  PlayIcon,
+  UserIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
@@ -17,19 +23,43 @@ interface Dice {
 export const ScoreCard = ({
   playerName,
   playerId,
+  isMyCard,
 }: {
   playerName: string;
   playerId: string;
+  isMyCard: boolean;
 }) => {
   const session = useSession();
   const router = useRouter();
-  const { data: dice } = api.game.getDiceRoll.useQuery(
+  const [showConfirm, setShowConfirm] = useState(false);
+  const { data: game } = api.game.byId.useQuery(
     {
-      gameId: router.query.gid as string,
+      id: router.query.gid as string,
     },
-    { enabled: !!router.query.gid }
+    {
+      onSettled: (data) => {
+        setShowConfirm((prev) => {
+          if (data && session.data) {
+            const { diceRolls, scoreCards } = data;
+            if (diceRolls && scoreCards) {
+              const entries = data.scoreCards.find(
+                (card) => card.userId === session.data.user.id
+              )?.scoreCardEntries;
+              if (entries) {
+                if (data.diceRolls.length > entries.length) {
+                  return true;
+                }
+              }
+            }
+          }
+          return false;
+        });
+      },
+      enabled: !!router.query.gid,
+    }
   );
-  if (!dice)
+
+  if (!game || !game?.diceRolls[0]?.whiteOne)
     return (
       <>
         <div className="container mx-auto rounded-lg border-2 border-solid border-black bg-[#dddddf]">
@@ -38,7 +68,7 @@ export const ScoreCard = ({
               <div
                 className={joinClassNames(
                   session?.data?.user?.id === playerId
-                    ? "rounded-xl bg-green-400 text-xl text-green-900"
+                    ? "rounded-xl bg-purple-400 text-xl text-purple-900"
                     : "text-blue-900",
                   "flex items-center gap-2 p-2"
                 )}
@@ -64,7 +94,12 @@ export const ScoreCard = ({
     <>
       <div className="container mx-auto rounded-lg border-2 border-solid border-black bg-[#dddddf]">
         <div className="p-1">
-          <div className="flex justify-between">
+          <div
+            className={joinClassNames(
+              isMyCard && showConfirm ? "" : "justify-between",
+              "flex"
+            )}
+          >
             <div
               className={joinClassNames(
                 session?.data?.user?.id === playerId
@@ -76,6 +111,23 @@ export const ScoreCard = ({
               <UserIcon className="h-6 w-6" />
               <span>{playerName ?? "no name"}</span>
             </div>
+            {isMyCard && showConfirm && (
+              <div className="flex grow items-center justify-center gap-2 md:gap-4">
+                <button
+                  onClick={() => {
+                    setShowConfirm(false);
+                  }}
+                  className="flex gap-1 rounded-xl border border-green-900 bg-green-200/80 p-2 text-green-900"
+                >
+                  <CheckBadgeIcon className="h-6 w-6 " />
+                  <span>Save</span>
+                </button>
+                <button className="flex gap-1 rounded-xl border border-red-900 bg-red-200/80 p-2 text-red-900">
+                  <XMarkIcon className="h-6 w-6 " />
+                  <span>Clear</span>
+                </button>
+              </div>
+            )}
             <div className="w-1/6 rounded-t-lg border-l-2 border-r-2 border-t-2 border-black">
               At least 5 X&apos;s
             </div>
@@ -83,40 +135,40 @@ export const ScoreCard = ({
           <ScoreCardRow
             isMyCard={session?.data?.user?.id === playerId}
             dice={{
-              whiteOne: dice.whiteOne,
-              whiteTwo: dice.whiteTwo,
-              red: dice.red,
+              whiteOne: game?.diceRolls[0]?.whiteOne,
+              whiteTwo: game?.diceRolls[0]?.whiteTwo,
+              red: game?.diceRolls[0]?.red,
             }}
             color="red"
           />
           <ScoreCardRow
             isMyCard={session?.data?.user?.id === playerId}
             dice={{
-              whiteOne: dice.whiteOne,
-              whiteTwo: dice.whiteTwo,
-              yellow: dice.yellow,
+              whiteOne: game?.diceRolls[0].whiteOne,
+              whiteTwo: game?.diceRolls[0].whiteTwo,
+              yellow: game?.diceRolls[0].yellow,
             }}
             color="yellow"
           />
           <ScoreCardRow
             isMyCard={session?.data?.user?.id === playerId}
             dice={{
-              whiteOne: dice.whiteOne,
-              whiteTwo: dice.whiteTwo,
-              green: dice.green,
+              whiteOne: game?.diceRolls[0].whiteOne,
+              whiteTwo: game?.diceRolls[0].whiteTwo,
+              green: game?.diceRolls[0].green,
             }}
             color="green"
           />
           <ScoreCardRow
             isMyCard={session?.data?.user?.id === playerId}
             dice={{
-              whiteOne: dice.whiteOne,
-              whiteTwo: dice.whiteTwo,
-              blue: dice.blue,
+              whiteOne: game?.diceRolls[0].whiteOne,
+              whiteTwo: game?.diceRolls[0].whiteTwo,
+              blue: game?.diceRolls[0].blue,
             }}
             color="blue"
           />
-          <ScoreCardLegendPenaltyRow dice={dice} />
+          <ScoreCardLegendPenaltyRow dice={game.diceRolls[0]} />
         </div>
         <ScoreCardTotalRow />
       </div>
@@ -128,10 +180,21 @@ const ScoreCardRow = ({
   dice,
   color,
   isMyCard,
+  entries,
 }: {
   dice?: Dice;
   color: string;
   isMyCard?: boolean;
+  entries?: {
+    redList: number[];
+    blueList: number[];
+    yellowList: number[];
+    greenList: number[];
+    penaltyOne: number;
+    penaltyTwo: number;
+    penaltyThree: number;
+    penaltyFour: number;
+  };
 }) => {
   const [row, setRow] = useState(() =>
     color === "green" || color === "blue"

@@ -144,4 +144,29 @@ export const gameRouter = createTRPCRouter({
         },
       });
     }),
+  createScoreCardEntry: protectedProcedure
+    .input(
+      z.object({
+        scoreCardId: z.string(),
+        entry: z.object({
+          redRow: z.number().optional(),
+          blueRow: z.number().optional(),
+          yellowRow: z.number().optional(),
+          greenRow: z.number().optional(),
+          penaltyOne: z.number().optional(),
+          penaltyTwo: z.number().optional(),
+          penaltyThree: z.number().optional(),
+          penaltyFour: z.number().optional(),
+        }),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { scoreCardId, entry } = input;
+      return await ctx.prisma.scoreCardEntry.create({
+        data: {
+          scoreCardId: +scoreCardId,
+          ...entry,
+        },
+      });
+    }),
 });

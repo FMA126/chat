@@ -104,14 +104,14 @@ model ScoreCard {
 model ScoreCardEntry {
     id        Int   @id @default(autoincrement())
     scoreCardId Int
-    redRow Int
-    blueRow Int
-    yellowRow Int
-    greenRow Int
-    penaltyOne Int
-    penaltyTwo Int
-    penaltyThree Int
-    penaltyFour Int
+    redRow Int?
+    blueRow Int?
+    yellowRow Int?
+    greenRow Int?
+    penaltyOne Int?
+    penaltyTwo Int?
+    penaltyThree Int?
+    penaltyFour Int?
     scoreCard ScoreCard @relation(fields: [scoreCardId], references: [id])
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

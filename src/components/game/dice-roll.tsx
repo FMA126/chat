@@ -10,9 +10,9 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useCallback, useEffect } from "react";
+import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
-import { usePusher } from "~/lib/usePusherClient";
+
 import { api } from "~/utils/api";
 
 export function DiceRoll({
@@ -20,19 +20,10 @@ export function DiceRoll({
 }: {
   players: { name: string | null; userId: string; cardId: number }[];
 }) {
-  const pusher = usePusher();
+  const [isRolling, setIsRolling] = useState(false);
+
   const session = useSession();
   const router = useRouter();
-  const {
-    data: dice,
-    refetch,
-    isFetching,
-  } = api.game.getDiceRoll.useQuery(
-    {
-      gameId: router.query.gid as string,
-    },
-    { enabled: !!router.query.gid }
-  );
   const { data: game } = api.game.byId.useQuery(
     {
       id: router.query.gid as string,
@@ -40,37 +31,23 @@ export function DiceRoll({
     { enabled: !!router.query.gid }
   );
 
-  const { mutate, error, data, isLoading } = api.game.rollDice.useMutation({
-    // async onMutate() {
-
-    // },
+  const { mutate, error } = api.game.rollDice.useMutation({
+    onMutate() {
+      setIsRolling(true);
+    },
     onError() {
       toast.error("Error rolling dice");
+      setIsRolling(false);
     },
-    async onSuccess() {
-      await refetch();
+    onSuccess() {
+      setIsRolling(false);
     },
   });
-  useEffect(() => {
-    async function updateGame(data: { message: string }) {
-      await refetch();
+
+  const diceNumber = useCallback((rolledNumber: number | undefined) => {
+    if (!rolledNumber) {
+      return undefined;
     }
-
-    const channel = dice && pusher.subscribe(`chat`);
-
-    channel &&
-      dice &&
-      channel.bind(`new-dice-roll:game:${dice.gameId}`, updateGame);
-
-    return () => {
-      channel &&
-        dice &&
-        channel.unbind(`new-dice-roll:game:${dice.gameId}`, updateGame);
-
-      pusher.unsubscribe("chat");
-    };
-  }, [pusher, dice?.gameId, refetch]);
-  const diceNumber = useCallback((rolledNumber: number) => {
     switch (rolledNumber) {
       case 1:
         return faDiceOne;
@@ -91,9 +68,9 @@ export function DiceRoll({
     mutate({ gameId: router.query.gid as string });
   };
 
-  if (error) return <div>Error getting dice</div>;
+  if (error) return <div className="text-center">Error getting dice</div>;
 
-  if (isLoading || isFetching)
+  if (isRolling)
     return (
       <>
         <div className="flex justify-center">
@@ -159,7 +136,7 @@ export function DiceRoll({
       </>
     );
 
-  if (!dice)
+  if (game?.diceRolls?.length === 0)
     return (
       <div className="flex flex-col items-center">
         <h2>
@@ -183,37 +160,37 @@ export function DiceRoll({
         <div className="flex max-w-2xl gap-2">
           <div className="">
             <FontAwesomeIcon
-              icon={diceNumber(dice.whiteOne) ?? faDice}
+              icon={diceNumber(game?.diceRolls[0]?.whiteOne) ?? faDice}
               className="h-14 w-14 bg-black text-white"
             />
           </div>
           <div className="">
             <FontAwesomeIcon
-              icon={diceNumber(dice.whiteTwo) ?? faDice}
+              icon={diceNumber(game?.diceRolls[0]?.whiteTwo) ?? faDice}
               className="h-14 w-14 bg-black text-white"
             />
           </div>
           <div className="">
             <FontAwesomeIcon
-              icon={diceNumber(dice.red) ?? faDice}
+              icon={diceNumber(game?.diceRolls[0]?.red) ?? faDice}
               className="h-14 w-14 bg-white text-[#e00000]"
             />
           </div>
           <div className="">
             <FontAwesomeIcon
-              icon={diceNumber(dice.yellow) ?? faDice}
+              icon={diceNumber(game?.diceRolls[0]?.yellow) ?? faDice}
               className="h-14 w-14 bg-white text-[#fdc800]"
             />
           </div>
           <div className="">
             <FontAwesomeIcon
-              icon={diceNumber(dice.green) ?? faDice}
+              icon={diceNumber(game?.diceRolls[0]?.green) ?? faDice}
               className="h-14 w-14 bg-white text-[#319800]"
             />
           </div>
           <div className="">
             <FontAwesomeIcon
-              icon={diceNumber(dice.blue) ?? faDice}
+              icon={diceNumber(game?.diceRolls[0]?.blue) ?? faDice}
               className="h-14 w-14 bg-white text-[#326698]"
             />
           </div>

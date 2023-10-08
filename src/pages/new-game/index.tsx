@@ -11,23 +11,13 @@ import { faDice } from "@fortawesome/free-solid-svg-icons";
 
 export default function NewGame() {
   const router = useRouter();
-  const utils = api.useContext();
   const {
     mutate: mutateNewGame,
     mutateAsync: mutateGameAsync,
     error: gameError,
     data: gameData,
     isLoading: isGameLoading,
-  } = api.game.createNewGame.useMutation({
-    // async onMutate() {
-    // },
-    // onError() {
-    //   toast.error("Error starting game");
-    // },
-    // onSuccess() {
-    //   toast.success("Game created successfully");
-    // },
-  });
+  } = api.game.createNewGame.useMutation({});
 
   const handleStartGame = async () => {
     await mutateGameAsync();
