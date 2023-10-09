@@ -22,25 +22,18 @@ import toast from "react-hot-toast";
 interface Dice {
   whiteOne: number;
   whiteTwo: number;
-  green?: number;
-  red?: number;
-  yellow?: number;
-  blue?: number;
+  green: number;
+  red: number;
+  yellow: number;
+  blue: number;
 }
 
-type PlayerEntries = Record<
-  string,
-  {
-    redRow: number[];
-    blueRow: number[];
-    yellowRow: number[];
-    greenRow: number[];
-    penaltyOne: number;
-    penaltyTwo: number;
-    penaltyThree: number;
-    penaltyFour: number;
-  }
->;
+enum DiceColor {
+  red = "red",
+  blue = "blue",
+  yellow = "yellow",
+  green = "green",
+}
 
 interface Mark {
   redRow?: number;
@@ -61,11 +54,6 @@ enum ColorRow {
 }
 
 // Todo
-// clear entry
-// submit entry
-// see what player has submitted entry for current roll
-// know when its my turn to roll
-// highlight available marks
 // game over
 // winner
 
@@ -109,10 +97,6 @@ export const ScoreCard = ({
       enabled: !!router.query.gid,
     }
   );
-
-  const { data: dice } = api.game.getDiceRoll.useQuery({
-    gameId: router.query.gid as string,
-  });
 
   const { mutate: mutateScoreCardEntry, error } =
     api.game.createScoreCardEntry.useMutation({
@@ -201,6 +185,15 @@ export const ScoreCard = ({
     setMarks((prev) => {
       const rowName = ColorRow[color as keyof typeof ColorRow];
       const isMyTurn = game?.diceRolls[0]?.userId === session.data?.user.id;
+      const duplicateMark = prev
+        .map(
+          (m) =>
+            Object.keys(m)[0] === rowName && Object.values(m)[0] === boxIdx + 2
+        )
+        .includes(true);
+      if (duplicateMark) {
+        return prev;
+      }
       if (isMyTurn) {
         if (prev.length === 2) {
           return prev;
@@ -320,6 +313,9 @@ export const ScoreCard = ({
               whiteOne: game?.diceRolls[0]?.whiteOne,
               whiteTwo: game?.diceRolls[0]?.whiteTwo,
               red: game?.diceRolls[0]?.red,
+              blue: game?.diceRolls[0]?.blue,
+              yellow: game?.diceRolls[0]?.yellow,
+              green: game?.diceRolls[0]?.green,
             }}
             updateCard={updateCard}
             marks={marks.filter(({ redRow }) => !!redRow)}
@@ -332,9 +328,12 @@ export const ScoreCard = ({
             setIsEditing={setIsEditing}
             isMyCard={session?.data?.user?.id === playerId}
             dice={{
-              whiteOne: game?.diceRolls[0].whiteOne,
-              whiteTwo: game?.diceRolls[0].whiteTwo,
-              yellow: game?.diceRolls[0].yellow,
+              whiteOne: game?.diceRolls[0]?.whiteOne,
+              whiteTwo: game?.diceRolls[0]?.whiteTwo,
+              red: game?.diceRolls[0]?.red,
+              blue: game?.diceRolls[0]?.blue,
+              yellow: game?.diceRolls[0]?.yellow,
+              green: game?.diceRolls[0]?.green,
             }}
             updateCard={updateCard}
             marks={marks.filter(({ yellowRow }) => !!yellowRow)}
@@ -347,9 +346,12 @@ export const ScoreCard = ({
             setIsEditing={setIsEditing}
             isMyCard={session?.data?.user?.id === playerId}
             dice={{
-              whiteOne: game?.diceRolls[0].whiteOne,
-              whiteTwo: game?.diceRolls[0].whiteTwo,
-              green: game?.diceRolls[0].green,
+              whiteOne: game?.diceRolls[0]?.whiteOne,
+              whiteTwo: game?.diceRolls[0]?.whiteTwo,
+              red: game?.diceRolls[0]?.red,
+              blue: game?.diceRolls[0]?.blue,
+              yellow: game?.diceRolls[0]?.yellow,
+              green: game?.diceRolls[0]?.green,
             }}
             updateCard={updateCard}
             marks={marks.filter(({ greenRow }) => !!greenRow)}
@@ -362,9 +364,12 @@ export const ScoreCard = ({
             setIsEditing={setIsEditing}
             isMyCard={session?.data?.user?.id === playerId}
             dice={{
-              whiteOne: game?.diceRolls[0].whiteOne,
-              whiteTwo: game?.diceRolls[0].whiteTwo,
-              blue: game?.diceRolls[0].blue,
+              whiteOne: game?.diceRolls[0]?.whiteOne,
+              whiteTwo: game?.diceRolls[0]?.whiteTwo,
+              red: game?.diceRolls[0]?.red,
+              blue: game?.diceRolls[0]?.blue,
+              yellow: game?.diceRolls[0]?.yellow,
+              green: game?.diceRolls[0]?.green,
             }}
             updateCard={updateCard}
             marks={marks.filter(({ blueRow }) => !!blueRow)}
@@ -383,6 +388,7 @@ export const ScoreCard = ({
             dice={game.diceRolls[0]}
             marks={marks.filter(
               ({ penaltyOne, penaltyTwo, penaltyThree, penaltyFour }) =>
+                // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
                 penaltyOne || penaltyTwo || penaltyThree || penaltyFour
             )}
             updateCard={updateCard}
@@ -431,7 +437,10 @@ const ScoreCardRow = ({
             className={joinClassNames(borderBoxColor(color), "grow basis-4")}
             key={boxIdx}
             onClick={() => {
-              updateCard && updateCard({ color, boxIdx });
+              isMyCard &&
+                isEditing &&
+                updateCard &&
+                updateCard({ color, boxIdx });
             }}
           >
             <div
@@ -441,15 +450,36 @@ const ScoreCardRow = ({
                   (m) =>
                     m[ColorRow[color as keyof typeof ColorRow]] === boxIdx + 2
                 )
-                  ? "border-slate-900 bg-slate-800 text-white"
+                  ? "border-slate-900 bg-cyan-300 text-white"
                   : "",
-                "rounded-lg text-center md:text-lg lg:text-2xl"
+                dice &&
+                  dice?.whiteOne + dice?.whiteTwo === box &&
+                  isEditing &&
+                  isMyCard
+                  ? "animate-pulse"
+                  : "",
+                dice &&
+                  dice.whiteOne + dice[color as keyof typeof DiceColor] ===
+                    box &&
+                  isEditing &&
+                  isMyCard
+                  ? "animate-pulse"
+                  : "",
+                dice &&
+                  dice.whiteTwo + dice[color as keyof typeof DiceColor] ===
+                    box &&
+                  isEditing &&
+                  isMyCard
+                  ? "animate-pulse"
+                  : "",
+                "flex items-center justify-center rounded-lg md:text-lg lg:text-2xl"
               )}
             >
-              {entries && !!entries[boxIdx] && (
-                <XMarkIcon className="h-10 w-10" />
+              {entries && !!entries[boxIdx] ? (
+                <XMarkIcon className="h-8 w-8 self-center" />
+              ) : (
+                <p>{box}</p>
               )}
-              {box}
             </div>
           </button>
         ))}
@@ -477,7 +507,7 @@ const ScoreCardLegendPenaltyRow = ({
   setIsEditing?: Dispatch<SetStateAction<boolean>>;
   playerId?: string;
   entries?: number[];
-  marks: Mark[];
+  marks?: Mark[];
   updateCard?: ({ color, boxIdx }: { color: string; boxIdx: number }) => void;
 }) => {
   return (
