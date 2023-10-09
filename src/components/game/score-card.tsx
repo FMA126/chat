@@ -54,6 +54,8 @@ enum ColorRow {
 }
 
 // Todo
+// non saved mark doesn't pulse
+// lock out row
 // game over
 // winner
 
@@ -98,7 +100,7 @@ export const ScoreCard = ({
     }
   );
 
-  const { mutate: mutateScoreCardEntry, error } =
+  const { mutate: mutateScoreCardEntry } =
     api.game.createScoreCardEntry.useMutation({
       onMutate() {
         setIsSubmitting(true);
@@ -185,14 +187,17 @@ export const ScoreCard = ({
     setMarks((prev) => {
       const rowName = ColorRow[color as keyof typeof ColorRow];
       const isMyTurn = game?.diceRolls[0]?.userId === session.data?.user.id;
-      const duplicateMark = prev
-        .map(
-          (m) =>
-            Object.keys(m)[0] === rowName && Object.values(m)[0] === boxIdx + 2
-        )
-        .includes(true);
-      if (duplicateMark) {
-        return prev;
+      const duplicateMarkIdx = prev.findIndex(
+        (m) =>
+          Object.keys(m)[0] === rowName && Object.values(m)[0] === boxIdx + 2
+      );
+      if (duplicateMarkIdx > -1) {
+        if (duplicateMarkIdx === 0) {
+          return [...prev.slice(1)];
+        }
+        if (duplicateMarkIdx === 1) {
+          return [...prev.slice(0, duplicateMarkIdx)];
+        }
       }
       if (isMyTurn) {
         if (prev.length === 2) {
@@ -440,6 +445,13 @@ const ScoreCardRow = ({
               isMyCard &&
                 isEditing &&
                 updateCard &&
+                dice &&
+                (dice?.whiteOne + dice?.whiteTwo === box ||
+                  dice.whiteOne + dice[color as keyof typeof DiceColor] ===
+                    box ||
+                  dice.whiteTwo + dice[color as keyof typeof DiceColor] ===
+                    box) &&
+                !(entries && !!entries[boxIdx]) &&
                 updateCard({ color, boxIdx });
             }}
           >
@@ -452,20 +464,23 @@ const ScoreCardRow = ({
                 )
                   ? "border-slate-900 bg-cyan-300 text-white"
                   : "",
-                dice &&
+                !(entries && !!entries[boxIdx]) &&
+                  dice &&
                   dice?.whiteOne + dice?.whiteTwo === box &&
                   isEditing &&
                   isMyCard
                   ? "animate-pulse"
                   : "",
-                dice &&
+                !(entries && !!entries[boxIdx]) &&
+                  dice &&
                   dice.whiteOne + dice[color as keyof typeof DiceColor] ===
                     box &&
                   isEditing &&
                   isMyCard
                   ? "animate-pulse"
                   : "",
-                dice &&
+                !(entries && !!entries[boxIdx]) &&
+                  dice &&
                   dice.whiteTwo + dice[color as keyof typeof DiceColor] ===
                     box &&
                   isEditing &&
