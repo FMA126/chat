@@ -25,20 +25,30 @@ export default function Game() {
     },
     { enabled: !!router.query.gid }
   );
-  const { mutateAsync, error, data, isLoading } = api.game.joinGame.useMutation(
-    {
-      onError() {
-        toast.error("Error joining game");
-      },
-      onSuccess() {
-        toast.success("Successfully joined game");
-      },
-    }
-  );
+  const {
+    mutate: mutateJoinGame,
+    error: errorJoiningGame,
+    data: joinGameData,
+    isLoading,
+  } = api.game.joinGame.useMutation({
+    async onError(error) {
+      toast.error(
+        error.message === "Game room full"
+          ? "Game room full"
+          : error.message === "Game already started"
+          ? "Game already started"
+          : "Error joining game"
+      );
+      await router.push("/");
+    },
+    onSuccess() {
+      toast.success("Successfully joined game");
+    },
+  });
   const { data: session } = useSession();
 
-  const joinGame = async () => {
-    await mutateAsync({ gameId: `${game?.id}` });
+  const joinGame = () => {
+    mutateJoinGame({ gameId: `${game?.id}` });
   };
 
   useEffect(() => {

@@ -18,7 +18,7 @@ export function GameNav() {
     toast.success("Game link copied!");
   };
   return (
-    <div className="flex gap-4 p-4">
+    <div className="flex gap-4 p-1 md:p-2">
       <div>
         <Link href="/new-game">
           <button className="rounded-lg border-2 border-solid border-green-200 px-4 py-2 text-white active:bg-gray-200">

@@ -228,7 +228,7 @@ export const ScoreCard = ({
   if (!game || !game?.diceRolls[0]?.whiteOne)
     return (
       <>
-        <div className="container mx-auto rounded-lg border-2 border-solid border-black bg-[#dddddf]">
+        <div className="container mx-auto rounded-lg border border-solid border-slate-400 bg-[#dddddf]">
           <div className="p-1">
             <div className="flex justify-between">
               <div
@@ -258,7 +258,7 @@ export const ScoreCard = ({
     );
   return (
     <>
-      <div className="container mx-auto rounded-lg border-2 border-solid border-black bg-[#dddddf]">
+      <div className="container mx-auto rounded-lg border border-solid border-slate-400 bg-[#dddddf]">
         <div className="p-1">
           <div
             className={joinClassNames(

@@ -36,7 +36,7 @@ export const GameWindow = () => {
         <div className="bg-blue-800">
           <GameNav />
         </div>
-        <div className="flex justify-center bg-white/50 p-2">
+        <div className="flex flex-wrap justify-center bg-white/50 p-2">
           {game?.scoreCards?.map((card) => (
             <div
               key={card.user.id}
@@ -47,8 +47,10 @@ export const GameWindow = () => {
                 "flex items-center rounded-lg p-1"
               )}
             >
-              <UserCircleIcon className="h-6 w-6" />
-              <div className="pl-1 pr-2 text-xl">{card.user.name}</div>
+              <UserCircleIcon className="h-4 w-4" />
+              <div className="pl-1 pr-2 text-xs md:text-xl">
+                {card.user.name}
+              </div>
             </div>
           ))}
         </div>
@@ -61,6 +63,9 @@ export const GameWindow = () => {
             }))}
           />
         </div>
+        <div className="">
+          <ScoreCardViewSelect setCardView={setCardView} />
+        </div>
         <div className="grow p-2">
           {cardView === "myCard" ? (
             <ScoreCard
@@ -69,13 +74,10 @@ export const GameWindow = () => {
               isMyCard={true}
             />
           ) : (
-            <div className="max-h-96 overflow-auto">
+            <div className="max-h-[500px] overflow-auto">
               <PlayersScoreCards />
             </div>
           )}
-        </div>
-        <div className="px-2 pb-11">
-          <ScoreCardViewSelect setCardView={setCardView} />
         </div>
       </div>
     </>

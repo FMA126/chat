@@ -8,7 +8,7 @@ export function ScoreCardViewSelect({
   setCardView: Dispatch<SetStateAction<string>>;
 }) {
   return (
-    <div className="container mx-auto flex justify-end gap-1">
+    <div className="flex justify-center gap-1">
       <div></div>
       <div></div>
       <div></div>

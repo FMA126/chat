@@ -48,8 +48,12 @@ export const gameRouter = createTRPCRouter({
   joinGame: protectedProcedure
     .input(z.object({ gameId: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      const { gameId } = input;
       const game = await prisma.game.findFirstOrThrow({
-        where: { id: +input.gameId },
+        where: { id: +gameId },
+      });
+      const numberOfDiceRolls = await prisma.diceRoll.count({
+        where: { gameId: +gameId },
       });
       const { playerOne, playerTwo, playerThree, playerFour, playerFive } =
         game;
@@ -63,7 +67,18 @@ export const gameRouter = createTRPCRouter({
       ];
 
       const nullPlayer = playerList.find((player) => player[1] === null);
-
+      if (numberOfDiceRolls) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Game already started",
+        });
+      }
+      if (!nullPlayer) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Game room full",
+        });
+      }
       if (nullPlayer) {
         const updatedGame = await ctx.prisma.game.update({
           where: {
@@ -88,7 +103,7 @@ export const gameRouter = createTRPCRouter({
         );
         return updatedGame;
       }
-      return new TRPCError({
+      throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "An unexpected error occurred, please try again later.",
       });
