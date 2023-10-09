@@ -53,8 +53,14 @@ enum ColorRow {
   green = "greenRow",
 }
 
+enum PenaltyRow {
+  penaltyOne = "penaltyOne",
+  penaltyTwo = "penaltyTwo",
+  penaltyThree = "penaltyThree",
+  penaltyFour = "penaltyFour",
+}
+
 // Todo
-// non saved mark doesn't pulse
 // lock out row
 // game over
 // winner
@@ -212,6 +218,37 @@ export const ScoreCard = ({
       }
       return [{ [rowName]: boxIdx + 2 }];
     });
+  };
+
+  const updatePenalty = (penaltyIdx: number) => {
+    if (penaltyIdx > -1) {
+      const mapPenalty =
+        penaltyIdx === 0
+          ? { penaltyOne: 1 }
+          : penaltyIdx === 1
+          ? { penaltyTwo: 1 }
+          : penaltyIdx === 2
+          ? { penaltyThree: 1 }
+          : penaltyIdx === 3
+          ? { penaltyFour: 1 }
+          : null;
+      setMarks((prev) => {
+        if (mapPenalty) {
+          const duplicateMarkIdx = prev.findIndex(
+            (m) =>
+              Object.keys(m)[0] === PenaltyRow.penaltyOne ||
+              Object.keys(m)[0] === PenaltyRow.penaltyTwo ||
+              Object.keys(m)[0] === PenaltyRow.penaltyThree ||
+              Object.keys(m)[0] === PenaltyRow.penaltyFour
+          );
+          if (duplicateMarkIdx > -1) {
+            return [];
+          }
+          return [mapPenalty] as Mark[];
+        }
+        return prev;
+      });
+    }
   };
 
   const submitEntry = () => {
@@ -397,6 +434,7 @@ export const ScoreCard = ({
                 penaltyOne || penaltyTwo || penaltyThree || penaltyFour
             )}
             updateCard={updateCard}
+            updatePenalty={updatePenalty}
           />
         </div>
         <ScoreCardTotalRow />
@@ -516,6 +554,7 @@ const ScoreCardLegendPenaltyRow = ({
   entries,
   updateCard,
   marks,
+  updatePenalty,
 }: {
   dice?: Dice;
   isEditing?: boolean;
@@ -524,6 +563,7 @@ const ScoreCardLegendPenaltyRow = ({
   entries?: number[];
   marks?: Mark[];
   updateCard?: ({ color, boxIdx }: { color: string; boxIdx: number }) => void;
+  updatePenalty?: (penaltyIdx: number) => void;
 }) => {
   return (
     <div className="flex py-2">
@@ -587,20 +627,43 @@ const ScoreCardLegendPenaltyRow = ({
         <div className="text-center">
           <span className="text-red-500">X</span> = -5
         </div>
-        <div className="flex">
-          <div className="h-4 w-4 rounded-md border-2 border-black bg-white">
-            {!!entries?.[0] && <XMarkIcon className="h-6 w-6 text-red-500" />}
+        <button
+          onClick={() => {
+            entries &&
+              updatePenalty &&
+              updatePenalty(entries?.findIndex((e) => e === 0));
+          }}
+          disabled={entries && entries?.filter((e) => e).length > 3}
+        >
+          <div className="flex">
+            {[
+              PenaltyRow.penaltyOne,
+              PenaltyRow.penaltyTwo,
+              PenaltyRow.penaltyThree,
+              PenaltyRow.penaltyFour,
+            ].map((penaltyName, pIdx) => (
+              <div
+                key={pIdx}
+                className={joinClassNames(
+                  marks?.find((m) => {
+                    console.log("mark", m);
+                    return (
+                      m[PenaltyRow[penaltyName as keyof typeof PenaltyRow]] ===
+                      1
+                    );
+                  })
+                    ? "bg-cyan-300 text-white"
+                    : "bg-white",
+                  "h-4 w-4 rounded-md border-2 border-black"
+                )}
+              >
+                {!!entries?.[pIdx] && (
+                  <XMarkIcon className="h-6 w-6 text-red-500" />
+                )}
+              </div>
+            ))}
           </div>
-          <div className="h-4 w-4 rounded-md border-2 border-black bg-white">
-            {!!entries?.[1] && <XMarkIcon className="h-6 w-6 text-red-500" />}
-          </div>
-          <div className="h-4 w-4 rounded-md border-2 border-black bg-white">
-            {!!entries?.[2] && <XMarkIcon className="h-6 w-6 text-red-500" />}
-          </div>
-          <div className="h-4 w-4 rounded-md border-2 border-black bg-white">
-            {!!entries?.[3] && <XMarkIcon className="h-6 w-6 text-red-500" />}
-          </div>
-        </div>
+        </button>
       </div>
     </div>
   );
