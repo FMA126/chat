@@ -62,8 +62,11 @@ enum PenaltyRow {
 
 // Todo
 // lock out row
+// all penalty boxes marked ends game
 // game over
+// totals
 // winner
+// leaderboard
 
 export const ScoreCard = ({
   playerName,
