@@ -31,16 +31,9 @@ export function DiceRoll({
     { enabled: !!router.query.gid }
   );
 
-  const { data: dice } = api.game.getDiceRoll.useQuery(
-    {
-      gameId: router.query.gid as string,
-    },
-    {
-      onSettled: (data) => {
-        console.log("getDiceRoll", data);
-      },
-    }
-  );
+  const { data: dice } = api.game.getDiceRoll.useQuery({
+    gameId: router.query.gid as string,
+  });
 
   const { mutate, error } = api.game.rollDice.useMutation({
     onMutate() {
@@ -109,7 +102,7 @@ export function DiceRoll({
     if (playersList[currentPlayerIdx] === playersList[playersList.length - 1]) {
       return playersList[0];
     }
-    console.log("nextPlayerTurn", playersList[currentPlayerIdx]);
+
     return playersList[currentPlayerIdx + 1];
   }, [game?.diceRolls]);
 

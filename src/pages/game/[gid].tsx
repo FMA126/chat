@@ -43,7 +43,6 @@ export default function Game() {
 
   useEffect(() => {
     async function updateGame(data: { message: string }) {
-      console.log("updateGame", data);
       await utils.game.invalidate();
     }
 

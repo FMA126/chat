@@ -79,7 +79,6 @@ export const gameRouter = createTRPCRouter({
             userId: ctx.session.user.id,
           },
         });
-        console.log("join game", game, playerList, nullPlayer);
         await pusherServerClient.trigger(
           `chat`,
           `player-joined:game:${input.gameId}`,

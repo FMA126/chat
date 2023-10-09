@@ -89,7 +89,6 @@ export const ScoreCard = ({
     },
     {
       onSettled: (data) => {
-        console.log(data);
         setIsEditing((prev) => {
           const entries = data?.scoreCards.find(
             (card) => card.userId === session.data?.user.id
@@ -400,9 +399,7 @@ const ScoreCardRow = ({
       : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
   );
   const [isClosedOut, setIsClosedOut] = useState(false);
-  useEffect(() => {
-    console.log(entries);
-  }, [JSON.stringify(entries)]);
+  useEffect(() => {}, [JSON.stringify(entries)]);
   return (
     <div className={joinClassNames(colorSwitch(color), "py-2")}>
       <div className="flex items-center py-1">
