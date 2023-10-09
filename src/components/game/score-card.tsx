@@ -200,12 +200,19 @@ export const ScoreCard = ({
   const updateCard = ({ color, boxIdx }: { color: string; boxIdx: number }) => {
     setMarks((prev) => {
       const rowName = ColorRow[color as keyof typeof ColorRow];
-      if (prev.length === 0) {
-        const newMark = {} as Mark;
-        newMark[rowName] = boxIdx + 2;
-        return [{ ...newMark }] as Mark[];
+      const isMyTurn = game?.diceRolls[0]?.userId === session.data?.user.id;
+      if (isMyTurn) {
+        if (prev.length === 2) {
+          return prev;
+        }
+        if (prev.length === 0) {
+          const newMark = {} as Mark;
+          newMark[rowName] = boxIdx + 2;
+          return [{ ...newMark }] as Mark[];
+        }
+        return [...prev, { [rowName]: boxIdx + 2 }] as Mark[];
       }
-      return [...prev, { [rowName]: boxIdx + 2 }] as Mark[];
+      return [{ [rowName]: boxIdx + 2 }];
     });
   };
 
@@ -288,7 +295,12 @@ export const ScoreCard = ({
                   <CheckBadgeIcon className="h-6 w-6 " />
                   <span>Save</span>
                 </button>
-                <button className="flex gap-1 rounded-xl border border-red-900 bg-red-200/80 p-2 text-red-900">
+                <button
+                  onClick={() => {
+                    setMarks([]);
+                  }}
+                  className="flex gap-1 rounded-xl border border-red-900 bg-red-200/80 p-2 text-red-900"
+                >
                   <XMarkIcon className="h-6 w-6 " />
                   <span>Clear</span>
                 </button>
@@ -310,6 +322,7 @@ export const ScoreCard = ({
               red: game?.diceRolls[0]?.red,
             }}
             updateCard={updateCard}
+            marks={marks.filter(({ redRow }) => !!redRow)}
             color="red"
           />
           <ScoreCardRow
@@ -324,6 +337,7 @@ export const ScoreCard = ({
               yellow: game?.diceRolls[0].yellow,
             }}
             updateCard={updateCard}
+            marks={marks.filter(({ yellowRow }) => !!yellowRow)}
             color="yellow"
           />
           <ScoreCardRow
@@ -338,6 +352,7 @@ export const ScoreCard = ({
               green: game?.diceRolls[0].green,
             }}
             updateCard={updateCard}
+            marks={marks.filter(({ greenRow }) => !!greenRow)}
             color="green"
           />
           <ScoreCardRow
@@ -352,6 +367,7 @@ export const ScoreCard = ({
               blue: game?.diceRolls[0].blue,
             }}
             updateCard={updateCard}
+            marks={marks.filter(({ blueRow }) => !!blueRow)}
             color="blue"
           />
           <ScoreCardLegendPenaltyRow
@@ -365,6 +381,10 @@ export const ScoreCard = ({
             isEditing={isEditing}
             setIsEditing={setIsEditing}
             dice={game.diceRolls[0]}
+            marks={marks.filter(
+              ({ penaltyOne, penaltyTwo, penaltyThree, penaltyFour }) =>
+                penaltyOne || penaltyTwo || penaltyThree || penaltyFour
+            )}
             updateCard={updateCard}
           />
         </div>
@@ -383,6 +403,7 @@ const ScoreCardRow = ({
   setIsEditing,
   playerId,
   updateCard,
+  marks,
 }: {
   dice?: Dice;
   color: string;
@@ -391,6 +412,7 @@ const ScoreCardRow = ({
   entries?: number[];
   isEditing?: boolean;
   setIsEditing?: Dispatch<SetStateAction<boolean>>;
+  marks?: Mark[];
   updateCard?: ({ color, boxIdx }: { color: string; boxIdx: number }) => void;
 }) => {
   const [row, setRow] = useState(() =>
@@ -415,6 +437,12 @@ const ScoreCardRow = ({
             <div
               className={joinClassNames(
                 innerBoxColor(color),
+                marks?.find(
+                  (m) =>
+                    m[ColorRow[color as keyof typeof ColorRow]] === boxIdx + 2
+                )
+                  ? "border-slate-900 bg-slate-800 text-white"
+                  : "",
                 "rounded-lg text-center md:text-lg lg:text-2xl"
               )}
             >
@@ -442,12 +470,14 @@ const ScoreCardLegendPenaltyRow = ({
   playerId,
   entries,
   updateCard,
+  marks,
 }: {
   dice?: Dice;
   isEditing?: boolean;
   setIsEditing?: Dispatch<SetStateAction<boolean>>;
   playerId?: string;
   entries?: number[];
+  marks: Mark[];
   updateCard?: ({ color, boxIdx }: { color: string; boxIdx: number }) => void;
 }) => {
   return (
@@ -514,16 +544,16 @@ const ScoreCardLegendPenaltyRow = ({
         </div>
         <div className="flex">
           <div className="h-4 w-4 rounded-md border-2 border-black bg-white">
-            {entries?.[0] && <XMarkIcon className="h-6 w-6 text-red-500" />}
+            {!!entries?.[0] && <XMarkIcon className="h-6 w-6 text-red-500" />}
           </div>
           <div className="h-4 w-4 rounded-md border-2 border-black bg-white">
-            {entries?.[1] && <XMarkIcon className="h-6 w-6 text-red-500" />}
+            {!!entries?.[1] && <XMarkIcon className="h-6 w-6 text-red-500" />}
           </div>
           <div className="h-4 w-4 rounded-md border-2 border-black bg-white">
-            {entries?.[2] && <XMarkIcon className="h-6 w-6 text-red-500" />}
+            {!!entries?.[2] && <XMarkIcon className="h-6 w-6 text-red-500" />}
           </div>
           <div className="h-4 w-4 rounded-md border-2 border-black bg-white">
-            {entries?.[3] && <XMarkIcon className="h-6 w-6 text-red-500" />}
+            {!!entries?.[3] && <XMarkIcon className="h-6 w-6 text-red-500" />}
           </div>
         </div>
       </div>
