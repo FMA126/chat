@@ -74,7 +74,7 @@ export const GameWindow = () => {
               isMyCard={true}
             />
           ) : (
-            <div className="max-h-[500px] overflow-auto">
+            <div className="max-h-[60vh] overflow-auto">
               <PlayersScoreCards />
             </div>
           )}

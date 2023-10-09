@@ -33,7 +33,7 @@ export function ScoreCardViewSelect({
             icon={faPeopleGroup}
             className="white h-6 w-6 pr-2"
           />
-          <span>Players</span>
+          <span>All Scorecards</span>
         </button>
       </div>
     </div>
