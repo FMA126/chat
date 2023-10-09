@@ -39,20 +39,18 @@ export default function Game() {
 
   const joinGame = async () => {
     await mutateAsync({ gameId: `${game?.id}` });
-    await utils.game.invalidate();
   };
 
   useEffect(() => {
     async function updateGame(data: { message: string }) {
       console.log("updateGame", data);
-      await refetchGame();
+      await utils.game.invalidate();
     }
 
     const channel = game?.id && pusher.subscribe(`chat`);
 
     channel && channel.bind(`player-joined:game:${game.id}`, updateGame);
     channel && channel.bind(`new-dice-roll:game:${game.id}`, updateGame);
-
     channel && channel.bind(`new-score-card-entry:game:${game.id}`, updateGame);
 
     return () => {

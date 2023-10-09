@@ -61,6 +61,7 @@ model User {
     sessions      Session[]
     diceRolls     DiceRoll[]
     scoreCards    ScoreCard[]
+    scoreCardEntries ScoreCardEntry[]
 }
 
 model VerificationToken {
@@ -104,6 +105,8 @@ model ScoreCard {
 model ScoreCardEntry {
     id        Int   @id @default(autoincrement())
     scoreCardId Int
+    diceRollId Int
+    userId String
     redRow Int?
     blueRow Int?
     yellowRow Int?
@@ -112,11 +115,14 @@ model ScoreCardEntry {
     penaltyTwo Int?
     penaltyThree Int?
     penaltyFour Int?
+    user User @relation(fields: [userId], references: [id])
     scoreCard ScoreCard @relation(fields: [scoreCardId], references: [id])
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@index([scoreCardId])
+    @@index([diceRollId])
+    @@index([userId])
 }
 
 model DiceRoll {

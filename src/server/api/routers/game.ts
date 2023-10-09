@@ -27,8 +27,16 @@ export const gameRouter = createTRPCRouter({
       const gameRes = await ctx.prisma.game.findFirstOrThrow({
         where: { id: +id },
         include: {
-          scoreCards: { include: { user: true, scoreCardEntries: true } },
-          diceRolls: { include: { game: true }, orderBy: { id: "desc" } },
+          scoreCards: {
+            include: {
+              user: true,
+              scoreCardEntries: { orderBy: { id: "desc" } },
+            },
+          },
+          diceRolls: {
+            include: { game: true },
+            orderBy: { id: "desc" },
+          },
         },
       });
 
@@ -130,7 +138,7 @@ export const gameRouter = createTRPCRouter({
       const { gameId } = input;
       return await ctx.prisma.diceRoll.findFirst({
         where: { gameId: +gameId },
-        orderBy: { id: "desc" },
+        orderBy: { createdAt: "desc" },
       });
     }),
   createNewScoreCard: protectedProcedure
@@ -147,26 +155,36 @@ export const gameRouter = createTRPCRouter({
   createScoreCardEntry: protectedProcedure
     .input(
       z.object({
-        scoreCardId: z.string(),
-        entry: z.object({
-          redRow: z.number().optional(),
-          blueRow: z.number().optional(),
-          yellowRow: z.number().optional(),
-          greenRow: z.number().optional(),
-          penaltyOne: z.number().optional(),
-          penaltyTwo: z.number().optional(),
-          penaltyThree: z.number().optional(),
-          penaltyFour: z.number().optional(),
-        }),
+        gameId: z.string(),
+        scoreCardId: z.number(),
+        diceRollId: z.number(),
+        entry: z.array(
+          z.object({
+            redRow: z.number().optional(),
+            blueRow: z.number().optional(),
+            yellowRow: z.number().optional(),
+            greenRow: z.number().optional(),
+            penaltyOne: z.number().optional(),
+            penaltyTwo: z.number().optional(),
+            penaltyThree: z.number().optional(),
+            penaltyFour: z.number().optional(),
+          })
+        ),
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const { scoreCardId, entry } = input;
-      return await ctx.prisma.scoreCardEntry.create({
-        data: {
-          scoreCardId: +scoreCardId,
-          ...entry,
-        },
-      });
+      const { gameId, scoreCardId, entry, diceRollId } = input;
+      const batchEntry = entry.map((e) => ({
+        scoreCardId,
+        diceRollId,
+        userId: ctx.session.user.id,
+        ...e,
+      }));
+      await ctx.prisma.scoreCardEntry.createMany({ data: [...batchEntry] });
+      await pusherServerClient.trigger(
+        "chat",
+        `new-score-card-entry:game:${gameId}`,
+        { message: "new card entry" }
+      );
     }),
 });

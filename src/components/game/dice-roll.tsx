@@ -10,7 +10,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 import { api } from "~/utils/api";
@@ -29,6 +29,17 @@ export function DiceRoll({
       id: router.query.gid as string,
     },
     { enabled: !!router.query.gid }
+  );
+
+  const { data: dice } = api.game.getDiceRoll.useQuery(
+    {
+      gameId: router.query.gid as string,
+    },
+    {
+      onSettled: (data) => {
+        console.log("getDiceRoll", data);
+      },
+    }
   );
 
   const { mutate, error } = api.game.rollDice.useMutation({
@@ -63,6 +74,49 @@ export function DiceRoll({
         return faDiceSix;
     }
   }, []);
+
+  const isTurnComplete = useMemo(() => {
+    const playersList = [
+      game?.playerOne,
+      game?.playerTwo,
+      game?.playerThree,
+      game?.playerFour,
+      game?.playerFive,
+    ].filter((player) => !!player);
+    const uniqueUserIdEntries = new Set<string>();
+    const check = game?.scoreCards
+      .map((sc) => sc.scoreCardEntries)
+      .flat()
+      ?.filter((scEntry) => scEntry.diceRollId === game?.diceRolls[0]?.id);
+    check?.forEach(({ userId }) => {
+      uniqueUserIdEntries.add(userId as string);
+    });
+    console.log("check", check);
+    console.log(
+      "uniqueUserIdEntries",
+      uniqueUserIdEntries.size,
+      playersList.length
+    );
+    return uniqueUserIdEntries.size === playersList.length;
+  }, [JSON.stringify(game)]);
+
+  const nextPlayerTurn = useMemo(() => {
+    const playersList = [
+      game?.playerOne,
+      game?.playerTwo,
+      game?.playerThree,
+      game?.playerFour,
+      game?.playerFive,
+    ].filter((player) => player);
+    const currentPlayerIdx = playersList.findIndex(
+      (player) => player === game?.diceRolls[0]?.userId
+    );
+    if (playersList[currentPlayerIdx] === playersList[playersList.length - 1]) {
+      return playersList[0];
+    }
+    console.log("nextPlayerTurn", playersList[currentPlayerIdx]);
+    return playersList[currentPlayerIdx + 1];
+  }, [game?.diceRolls]);
 
   const handleRollDice = () => {
     mutate({ gameId: router.query.gid as string });
@@ -197,14 +251,19 @@ export function DiceRoll({
         </div>
       </div>
       <div className="flex items-center justify-center">
-        <button
-          className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900 active:bg-cyan-100"
-          onClick={handleRollDice}
-          // disabled={players.findIndex((player) => player.id === dice.userId)}
-        >
-          <FontAwesomeIcon icon={faDice} className="h-6 w-6 pr-2 text-white" />
-          <span>Roll</span>
-        </button>
+        {nextPlayerTurn === session.data?.user.id && isTurnComplete && (
+          <button
+            className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900 active:bg-cyan-100"
+            onClick={handleRollDice}
+            // disabled={players.findIndex((player) => player.id === dice.userId)}
+          >
+            <FontAwesomeIcon
+              icon={faDice}
+              className="h-6 w-6 pr-2 text-white"
+            />
+            <span>Roll</span>
+          </button>
+        )}
       </div>
     </>
   );

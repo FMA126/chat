@@ -6,10 +6,18 @@ import {
   UserIcon,
   XMarkIcon,
 } from "@heroicons/react/24/solid";
-import { useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
+import toast from "react-hot-toast";
 
 interface Dice {
   whiteOne: number;
@@ -19,6 +27,47 @@ interface Dice {
   yellow?: number;
   blue?: number;
 }
+
+type PlayerEntries = Record<
+  string,
+  {
+    redRow: number[];
+    blueRow: number[];
+    yellowRow: number[];
+    greenRow: number[];
+    penaltyOne: number;
+    penaltyTwo: number;
+    penaltyThree: number;
+    penaltyFour: number;
+  }
+>;
+
+interface Mark {
+  redRow?: number;
+  blueRow?: number;
+  yellowRow?: number;
+  greenRow?: number;
+  penaltyOne?: number;
+  penaltyTwo?: number;
+  penaltyThree?: number;
+  penaltyFour?: number;
+}
+
+enum ColorRow {
+  red = "redRow",
+  blue = "blueRow",
+  yellow = "yellowRow",
+  green = "greenRow",
+}
+
+// Todo
+// clear entry
+// submit entry
+// see what player has submitted entry for current roll
+// know when its my turn to roll
+// highlight available marks
+// game over
+// winner
 
 export const ScoreCard = ({
   playerName,
@@ -31,24 +80,27 @@ export const ScoreCard = ({
 }) => {
   const session = useSession();
   const router = useRouter();
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [marks, setMarks] = useState<Mark[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: game } = api.game.byId.useQuery(
     {
       id: router.query.gid as string,
     },
     {
       onSettled: (data) => {
-        setShowConfirm((prev) => {
-          if (data && session.data) {
-            const { diceRolls, scoreCards } = data;
-            if (diceRolls && scoreCards) {
-              const entries = data.scoreCards.find(
-                (card) => card.userId === session.data.user.id
-              )?.scoreCardEntries;
-              if (entries) {
-                if (data.diceRolls.length > entries.length) {
-                  return true;
-                }
+        console.log(data);
+        setIsEditing((prev) => {
+          const entries = data?.scoreCards.find(
+            (card) => card.userId === session.data?.user.id
+          )?.scoreCardEntries;
+          if (data?.diceRolls && entries) {
+            if (data?.diceRolls?.length > entries?.length) {
+              return true;
+            }
+            if (data.diceRolls[0] && entries[0]) {
+              if (data?.diceRolls[0]?.createdAt > entries[0]?.createdAt) {
+                return true;
               }
             }
           }
@@ -58,6 +110,121 @@ export const ScoreCard = ({
       enabled: !!router.query.gid,
     }
   );
+
+  const { data: dice } = api.game.getDiceRoll.useQuery({
+    gameId: router.query.gid as string,
+  });
+
+  const { mutate: mutateScoreCardEntry, error } =
+    api.game.createScoreCardEntry.useMutation({
+      onMutate() {
+        setIsSubmitting(true);
+      },
+      onError() {
+        toast.error("Error updating card");
+        setIsSubmitting(true);
+      },
+      onSuccess() {
+        toast.success("Nice move!");
+        setIsSubmitting(true);
+        setMarks([]);
+      },
+    });
+
+  const entries = useMemo(() => {
+    const playerEntries = game?.scoreCards?.find(
+      (card) => card.userId === playerId
+    )?.scoreCardEntries;
+    const reduceEntries = playerEntries?.reduce(
+      (rows, currentEntry) => {
+        const {
+          redRow: red,
+          blueRow: blue,
+          yellowRow: yellow,
+          greenRow: green,
+          penaltyOne,
+          penaltyTwo,
+          penaltyThree,
+          penaltyFour,
+        } = currentEntry;
+        if (red) {
+          rows[ColorRow.red][red - 2] = 1;
+        }
+        if (blue) {
+          rows[ColorRow.blue][blue - 2] = 1;
+        }
+        if (yellow) {
+          rows[ColorRow.yellow][yellow - 2] = 1;
+        }
+        if (green) {
+          rows[ColorRow.green][green - 2] = 1;
+        }
+        if (penaltyOne) {
+          rows.penaltyOne = 1;
+        }
+        if (penaltyTwo) {
+          rows.penaltyTwo = 1;
+        }
+        if (penaltyThree) {
+          rows.penaltyThree = 1;
+        }
+        if (penaltyFour) {
+          rows.penaltyFour = 1;
+        }
+        return rows;
+      },
+      {
+        redRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        blueRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        yellowRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        greenRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        penaltyOne: 0,
+        penaltyTwo: 0,
+        penaltyThree: 0,
+        penaltyFour: 0,
+      }
+    );
+    return (
+      reduceEntries ?? {
+        redRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        blueRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        yellowRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        greenRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        penaltyOne: 0,
+        penaltyTwo: 0,
+        penaltyThree: 0,
+        penaltyFour: 0,
+      }
+    );
+  }, [game?.scoreCards, playerId]);
+
+  const updateCard = ({ color, boxIdx }: { color: string; boxIdx: number }) => {
+    setMarks((prev) => {
+      const rowName = ColorRow[color as keyof typeof ColorRow];
+      if (prev.length === 0) {
+        const newMark = {} as Mark;
+        newMark[rowName] = boxIdx + 2;
+        return [{ ...newMark }] as Mark[];
+      }
+      return [...prev, { [rowName]: boxIdx + 2 }] as Mark[];
+    });
+  };
+
+  const submitEntry = () => {
+    const scoreCardId = game?.scoreCards.find(
+      (card) => card.userId === session.data?.user.id
+    )?.id;
+    const diceRollId = game?.diceRolls[0]?.id;
+    scoreCardId &&
+      diceRollId &&
+      marks.length &&
+      mutateScoreCardEntry({
+        gameId: router.query.gid as string,
+        scoreCardId,
+        diceRollId,
+        entry: marks,
+      });
+  };
 
   if (!game || !game?.diceRolls[0]?.whiteOne)
     return (
@@ -96,7 +263,7 @@ export const ScoreCard = ({
         <div className="p-1">
           <div
             className={joinClassNames(
-              isMyCard && showConfirm ? "" : "justify-between",
+              isMyCard && isEditing ? "" : "justify-between",
               "flex"
             )}
           >
@@ -111,11 +278,11 @@ export const ScoreCard = ({
               <UserIcon className="h-6 w-6" />
               <span>{playerName ?? "no name"}</span>
             </div>
-            {isMyCard && showConfirm && (
+            {isMyCard && isEditing && (
               <div className="flex grow items-center justify-center gap-2 md:gap-4">
                 <button
                   onClick={() => {
-                    setShowConfirm(false);
+                    submitEntry();
                   }}
                   className="flex gap-1 rounded-xl border border-green-900 bg-green-200/80 p-2 text-green-900"
                 >
@@ -133,42 +300,74 @@ export const ScoreCard = ({
             </div>
           </div>
           <ScoreCardRow
+            playerId={playerId}
+            entries={entries[ColorRow.red]}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
             isMyCard={session?.data?.user?.id === playerId}
             dice={{
               whiteOne: game?.diceRolls[0]?.whiteOne,
               whiteTwo: game?.diceRolls[0]?.whiteTwo,
               red: game?.diceRolls[0]?.red,
             }}
+            updateCard={updateCard}
             color="red"
           />
           <ScoreCardRow
+            playerId={playerId}
+            entries={entries[ColorRow.yellow]}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
             isMyCard={session?.data?.user?.id === playerId}
             dice={{
               whiteOne: game?.diceRolls[0].whiteOne,
               whiteTwo: game?.diceRolls[0].whiteTwo,
               yellow: game?.diceRolls[0].yellow,
             }}
+            updateCard={updateCard}
             color="yellow"
           />
           <ScoreCardRow
+            playerId={playerId}
+            entries={entries[ColorRow.green]}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
             isMyCard={session?.data?.user?.id === playerId}
             dice={{
               whiteOne: game?.diceRolls[0].whiteOne,
               whiteTwo: game?.diceRolls[0].whiteTwo,
               green: game?.diceRolls[0].green,
             }}
+            updateCard={updateCard}
             color="green"
           />
           <ScoreCardRow
+            playerId={playerId}
+            entries={entries[ColorRow.blue]}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
             isMyCard={session?.data?.user?.id === playerId}
             dice={{
               whiteOne: game?.diceRolls[0].whiteOne,
               whiteTwo: game?.diceRolls[0].whiteTwo,
               blue: game?.diceRolls[0].blue,
             }}
+            updateCard={updateCard}
             color="blue"
           />
-          <ScoreCardLegendPenaltyRow dice={game.diceRolls[0]} />
+          <ScoreCardLegendPenaltyRow
+            playerId={playerId}
+            entries={[
+              entries.penaltyOne,
+              entries.penaltyTwo,
+              entries.penaltyThree,
+              entries.penaltyFour,
+            ]}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+            dice={game.diceRolls[0]}
+            updateCard={updateCard}
+          />
         </div>
         <ScoreCardTotalRow />
       </div>
@@ -181,20 +380,19 @@ const ScoreCardRow = ({
   color,
   isMyCard,
   entries,
+  isEditing,
+  setIsEditing,
+  playerId,
+  updateCard,
 }: {
   dice?: Dice;
   color: string;
   isMyCard?: boolean;
-  entries?: {
-    redList: number[];
-    blueList: number[];
-    yellowList: number[];
-    greenList: number[];
-    penaltyOne: number;
-    penaltyTwo: number;
-    penaltyThree: number;
-    penaltyFour: number;
-  };
+  playerId?: string;
+  entries?: number[];
+  isEditing?: boolean;
+  setIsEditing?: Dispatch<SetStateAction<boolean>>;
+  updateCard?: ({ color, boxIdx }: { color: string; boxIdx: number }) => void;
 }) => {
   const [row, setRow] = useState(() =>
     color === "green" || color === "blue"
@@ -202,14 +400,20 @@ const ScoreCardRow = ({
       : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
   );
   const [isClosedOut, setIsClosedOut] = useState(false);
+  useEffect(() => {
+    console.log(entries);
+  }, [JSON.stringify(entries)]);
   return (
     <div className={joinClassNames(colorSwitch(color), "py-2")}>
       <div className="flex items-center py-1">
         <PlayIcon className="h-2 w-2 grow text-black md:h-4 lg:h-4" />
         {row.map((box, boxIdx) => (
-          <div
+          <button
             className={joinClassNames(borderBoxColor(color), "grow basis-4")}
             key={boxIdx}
+            onClick={() => {
+              updateCard && updateCard({ color, boxIdx });
+            }}
           >
             <div
               className={joinClassNames(
@@ -217,9 +421,12 @@ const ScoreCardRow = ({
                 "rounded-lg text-center md:text-lg lg:text-2xl"
               )}
             >
+              {entries && !!entries[boxIdx] && (
+                <XMarkIcon className="h-10 w-10" />
+              )}
               {box}
             </div>
-          </div>
+          </button>
         ))}
         <div className={joinClassNames("flex grow justify-center rounded-lg")}>
           <div className={joinClassNames(innerBoxColor(color), "h-8 w-8 p-1")}>
@@ -231,7 +438,21 @@ const ScoreCardRow = ({
   );
 };
 
-const ScoreCardLegendPenaltyRow = ({ dice }: { dice?: Dice }) => {
+const ScoreCardLegendPenaltyRow = ({
+  dice,
+  isEditing,
+  setIsEditing,
+  playerId,
+  entries,
+  updateCard,
+}: {
+  dice?: Dice;
+  isEditing?: boolean;
+  setIsEditing?: Dispatch<SetStateAction<boolean>>;
+  playerId?: string;
+  entries?: number[];
+  updateCard?: ({ color, boxIdx }: { color: string; boxIdx: number }) => void;
+}) => {
   return (
     <div className="flex py-2">
       <div className="grid grid-cols-1 divide-y divide-black">
@@ -295,10 +516,18 @@ const ScoreCardLegendPenaltyRow = ({ dice }: { dice?: Dice }) => {
           <span className="text-red-500">X</span> = -5
         </div>
         <div className="flex">
-          <div className="h-4 w-4 rounded-md border-2 border-black bg-white"></div>
-          <div className="h-4 w-4 rounded-md border-2 border-black bg-white"></div>
-          <div className="h-4 w-4 rounded-md border-2 border-black bg-white"></div>
-          <div className="h-4 w-4 rounded-md border-2 border-black bg-white"></div>
+          <div className="h-4 w-4 rounded-md border-2 border-black bg-white">
+            {entries?.[0] && <XMarkIcon className="h-6 w-6 text-red-500" />}
+          </div>
+          <div className="h-4 w-4 rounded-md border-2 border-black bg-white">
+            {entries?.[1] && <XMarkIcon className="h-6 w-6 text-red-500" />}
+          </div>
+          <div className="h-4 w-4 rounded-md border-2 border-black bg-white">
+            {entries?.[2] && <XMarkIcon className="h-6 w-6 text-red-500" />}
+          </div>
+          <div className="h-4 w-4 rounded-md border-2 border-black bg-white">
+            {entries?.[3] && <XMarkIcon className="h-6 w-6 text-red-500" />}
+          </div>
         </div>
       </div>
     </div>
