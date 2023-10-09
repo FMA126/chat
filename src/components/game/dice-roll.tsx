@@ -89,14 +89,9 @@ export function DiceRoll({
       .flat()
       ?.filter((scEntry) => scEntry.diceRollId === game?.diceRolls[0]?.id);
     check?.forEach(({ userId }) => {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       uniqueUserIdEntries.add(userId as string);
     });
-    console.log("check", check);
-    console.log(
-      "uniqueUserIdEntries",
-      uniqueUserIdEntries.size,
-      playersList.length
-    );
     return uniqueUserIdEntries.size === playersList.length;
   }, [JSON.stringify(game)]);
 
