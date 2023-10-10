@@ -200,6 +200,13 @@ export const ScoreCard = ({
         (m) =>
           Object.keys(m)[0] === rowName && Object.values(m)[0] === boxIdx + 2
       );
+      const penaltyIdx = prev.findIndex(
+        (m) =>
+          Object.keys(m)[0] === PenaltyRow.penaltyOne ||
+          Object.keys(m)[0] === PenaltyRow.penaltyTwo ||
+          Object.keys(m)[0] === PenaltyRow.penaltyThree ||
+          Object.keys(m)[0] === PenaltyRow.penaltyFour
+      );
       if (duplicateMarkIdx > -1) {
         if (duplicateMarkIdx === 0) {
           return [...prev.slice(1)];
@@ -216,6 +223,9 @@ export const ScoreCard = ({
           const newMark = {} as Mark;
           newMark[rowName] = boxIdx + 2;
           return [{ ...newMark }] as Mark[];
+        }
+        if (penaltyIdx > -1) {
+          return [{ [rowName]: boxIdx + 2 }] as Mark[];
         }
         return [...prev, { [rowName]: boxIdx + 2 }] as Mark[];
       }
