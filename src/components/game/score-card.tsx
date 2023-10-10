@@ -168,10 +168,10 @@ export const ScoreCard = ({
         return rows;
       },
       {
-        redRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        blueRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        yellowRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        greenRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        redRow: new Array(11).fill(0),
+        blueRow: new Array(11).fill(0),
+        yellowRow: new Array(11).fill(0),
+        greenRow: new Array(11).fill(0),
         penaltyOne: 0,
         penaltyTwo: 0,
         penaltyThree: 0,
@@ -180,10 +180,10 @@ export const ScoreCard = ({
     );
     return (
       reduceEntries ?? {
-        redRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        blueRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        yellowRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        greenRow: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        redRow: new Array(11).fill(0),
+        blueRow: new Array(11).fill(0),
+        yellowRow: new Array(11).fill(0),
+        greenRow: new Array(11).fill(0),
         penaltyOne: 0,
         penaltyTwo: 0,
         penaltyThree: 0,
@@ -262,6 +262,33 @@ export const ScoreCard = ({
         return prev;
       });
     }
+  };
+
+  const isMyTurn = useMemo(() => {
+    const myTurn =
+      game &&
+      game?.diceRolls[0] &&
+      session.data &&
+      game?.diceRolls[0].userId === session.data.user.id;
+    return !!myTurn;
+  }, [JSON.stringify(game?.diceRolls[0]), game, session.data]);
+
+  const markableBox = (color: string, box: number, entries: number[]) => {
+    const firstEntryGreenBlue =
+      entries.findIndex((e) => !!e) >= 0
+        ? 12 - entries.findIndex((e) => !!e)
+        : 13;
+    const firstEntryRedYellow =
+      entries.findIndex((e) => !!e) >= 0
+        ? entries.findIndex((e) => !!e) + 2
+        : 1;
+
+    const availableBox =
+      color === "green" || color === "blue"
+        ? box < firstEntryGreenBlue
+        : box > firstEntryRedYellow;
+
+    return availableBox;
   };
 
   const submitEntry = () => {
@@ -364,6 +391,7 @@ export const ScoreCard = ({
             isEditing={isEditing}
             setIsEditing={setIsEditing}
             isMyCard={session?.data?.user?.id === playerId}
+            isMyTurn={isMyTurn}
             dice={{
               whiteOne: game?.diceRolls[0]?.whiteOne,
               whiteTwo: game?.diceRolls[0]?.whiteTwo,
@@ -375,6 +403,7 @@ export const ScoreCard = ({
             updateCard={updateCard}
             marks={marks.filter(({ redRow }) => !!redRow)}
             color="red"
+            markableBox={markableBox}
           />
           <ScoreCardRow
             playerId={playerId}
@@ -382,6 +411,7 @@ export const ScoreCard = ({
             isEditing={isEditing}
             setIsEditing={setIsEditing}
             isMyCard={session?.data?.user?.id === playerId}
+            isMyTurn={isMyTurn}
             dice={{
               whiteOne: game?.diceRolls[0]?.whiteOne,
               whiteTwo: game?.diceRolls[0]?.whiteTwo,
@@ -393,6 +423,7 @@ export const ScoreCard = ({
             updateCard={updateCard}
             marks={marks.filter(({ yellowRow }) => !!yellowRow)}
             color="yellow"
+            markableBox={markableBox}
           />
           <ScoreCardRow
             playerId={playerId}
@@ -400,6 +431,7 @@ export const ScoreCard = ({
             isEditing={isEditing}
             setIsEditing={setIsEditing}
             isMyCard={session?.data?.user?.id === playerId}
+            isMyTurn={isMyTurn}
             dice={{
               whiteOne: game?.diceRolls[0]?.whiteOne,
               whiteTwo: game?.diceRolls[0]?.whiteTwo,
@@ -411,6 +443,7 @@ export const ScoreCard = ({
             updateCard={updateCard}
             marks={marks.filter(({ greenRow }) => !!greenRow)}
             color="green"
+            markableBox={markableBox}
           />
           <ScoreCardRow
             playerId={playerId}
@@ -418,6 +451,7 @@ export const ScoreCard = ({
             isEditing={isEditing}
             setIsEditing={setIsEditing}
             isMyCard={session?.data?.user?.id === playerId}
+            isMyTurn={isMyTurn}
             dice={{
               whiteOne: game?.diceRolls[0]?.whiteOne,
               whiteTwo: game?.diceRolls[0]?.whiteTwo,
@@ -429,6 +463,7 @@ export const ScoreCard = ({
             updateCard={updateCard}
             marks={marks.filter(({ blueRow }) => !!blueRow)}
             color="blue"
+            markableBox={markableBox}
           />
           <ScoreCardLegendPenaltyRow
             playerId={playerId}
@@ -460,22 +495,26 @@ const ScoreCardRow = ({
   dice,
   color,
   isMyCard,
+  isMyTurn,
   entries,
   isEditing,
   setIsEditing,
   playerId,
   updateCard,
   marks,
+  markableBox,
 }: {
   dice?: Dice;
   color: string;
   isMyCard?: boolean;
+  isMyTurn?: boolean;
   playerId?: string;
   entries?: number[];
   isEditing?: boolean;
   setIsEditing?: Dispatch<SetStateAction<boolean>>;
   marks?: Mark[];
   updateCard?: ({ color, boxIdx }: { color: string; boxIdx: number }) => void;
+  markableBox?: (color: string, box: number, entries: number[]) => boolean;
 }) => {
   const [row, setRow] = useState(() =>
     color === "green" || color === "blue"
@@ -493,17 +532,34 @@ const ScoreCardRow = ({
             className={joinClassNames(borderBoxColor(color), "grow basis-4")}
             key={boxIdx}
             onClick={() => {
-              isMyCard &&
-                isEditing &&
-                updateCard &&
-                dice &&
-                (dice?.whiteOne + dice?.whiteTwo === box ||
-                  dice.whiteOne + dice[color as keyof typeof DiceColor] ===
-                    box ||
-                  dice.whiteTwo + dice[color as keyof typeof DiceColor] ===
-                    box) &&
-                !(entries && !!entries[boxIdx]) &&
-                updateCard({ color, boxIdx });
+              if (entries) {
+                const firstEntryGreenBlue =
+                  entries.findIndex((e) => !!e) >= 0
+                    ? 12 - entries.findIndex((e) => !!e)
+                    : 13;
+                const firstEntryRedYellow =
+                  entries.findIndex((e) => !!e) >= 0
+                    ? entries.findIndex((e) => !!e) + 2
+                    : 1;
+
+                const availableBox =
+                  color === "green" || color === "blue"
+                    ? box < firstEntryGreenBlue
+                    : box > firstEntryRedYellow;
+
+                isMyCard &&
+                  isEditing &&
+                  updateCard &&
+                  dice &&
+                  (dice?.whiteOne + dice?.whiteTwo === box ||
+                    dice.whiteOne + dice[color as keyof typeof DiceColor] ===
+                      box ||
+                    dice.whiteTwo + dice[color as keyof typeof DiceColor] ===
+                      box) &&
+                  !(entries && !!entries[boxIdx]) &&
+                  availableBox &&
+                  updateCard({ color, boxIdx });
+              }
             }}
           >
             <div
@@ -519,7 +575,11 @@ const ScoreCardRow = ({
                   dice &&
                   dice?.whiteOne + dice?.whiteTwo === box &&
                   isEditing &&
-                  isMyCard
+                  isMyTurn &&
+                  isMyCard &&
+                  entries &&
+                  markableBox &&
+                  markableBox(color, box, entries)
                   ? "animate-pulse"
                   : "",
                 !(entries && !!entries[boxIdx]) &&
@@ -527,7 +587,10 @@ const ScoreCardRow = ({
                   dice.whiteOne + dice[color as keyof typeof DiceColor] ===
                     box &&
                   isEditing &&
-                  isMyCard
+                  isMyCard &&
+                  entries &&
+                  markableBox &&
+                  markableBox(color, box, entries)
                   ? "animate-pulse"
                   : "",
                 !(entries && !!entries[boxIdx]) &&
@@ -535,7 +598,10 @@ const ScoreCardRow = ({
                   dice.whiteTwo + dice[color as keyof typeof DiceColor] ===
                     box &&
                   isEditing &&
-                  isMyCard
+                  isMyCard &&
+                  entries &&
+                  markableBox &&
+                  markableBox(color, box, entries)
                   ? "animate-pulse"
                   : "",
                 "flex items-center justify-center rounded-lg md:text-lg lg:text-2xl"
