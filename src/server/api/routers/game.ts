@@ -178,6 +178,10 @@ export const gameRouter = createTRPCRouter({
             blueRow: z.number().optional(),
             yellowRow: z.number().optional(),
             greenRow: z.number().optional(),
+            redLock: z.number().optional(),
+            blueLock: z.number().optional(),
+            yellowLock: z.number().optional(),
+            greenLock: z.number().optional(),
             penaltyOne: z.number().optional(),
             penaltyTwo: z.number().optional(),
             penaltyThree: z.number().optional(),
@@ -194,7 +198,40 @@ export const gameRouter = createTRPCRouter({
         userId: ctx.session.user.id,
         ...e,
       }));
-      await ctx.prisma.scoreCardEntry.createMany({ data: [...batchEntry] });
+      if (entry.length === 0) {
+        await ctx.prisma.scoreCardEntry.create({
+          data: {
+            scoreCardId,
+            diceRollId,
+            userId: ctx.session.user.id,
+            pass: true,
+          },
+        });
+      } else {
+        await ctx.prisma.scoreCardEntry.createMany({ data: [...batchEntry] });
+        const mapLock = batchEntry.find(
+          (e) =>
+            e.redLock === 1 ||
+            e.yellowLock === 1 ||
+            e.blueLock === 1 ||
+            e.greenLock === 1
+        );
+        if (mapLock) {
+          await ctx.prisma.scoreCard.updateMany({
+            where: { gameId: +gameId },
+            data: mapLock.redLock
+              ? { redLock: 1 }
+              : mapLock.yellowLock
+              ? { yellowLock: 1 }
+              : mapLock.blueLock
+              ? { blueLock: 1 }
+              : mapLock.redLock
+              ? { redLock: 1 }
+              : {},
+          });
+        }
+      }
+
       await pusherServerClient.trigger(
         "chat",
         `new-score-card-entry:game:${gameId}`,

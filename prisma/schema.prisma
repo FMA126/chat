@@ -83,7 +83,6 @@ model Game {
   winner String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
   diceRolls DiceRoll[]
   scoreCards ScoreCard[]
 }
@@ -95,6 +94,10 @@ model ScoreCard {
     game Game @relation(fields: [gameId], references: [id])
     user         User     @relation(fields: [userId], references: [id])
     scoreCardEntries ScoreCardEntry[]
+    redLock Int?
+    blueLock Int?
+    yellowLock Int?
+    greenLock Int?
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
@@ -111,10 +114,15 @@ model ScoreCardEntry {
     blueRow Int?
     yellowRow Int?
     greenRow Int?
+    redLock Int?
+    blueLock Int?
+    yellowLock Int?
+    greenLock Int?
     penaltyOne Int?
     penaltyTwo Int?
     penaltyThree Int?
     penaltyFour Int?
+    pass Boolean?
     user User @relation(fields: [userId], references: [id])
     scoreCard ScoreCard @relation(fields: [scoreCardId], references: [id])
     createdAt DateTime @default(now())
