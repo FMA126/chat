@@ -275,12 +275,12 @@ export const ScoreCard = ({
 
   const markableBox = (color: string, box: number, entries: number[]) => {
     const firstEntryGreenBlue =
-      entries.findIndex((e) => !!e) >= 0
-        ? 12 - entries.findIndex((e) => !!e)
+      entries.findLastIndex((e) => !!e) >= 0
+        ? 12 - entries.findLastIndex((e) => !!e)
         : 13;
     const firstEntryRedYellow =
-      entries.findIndex((e) => !!e) >= 0
-        ? entries.findIndex((e) => !!e) + 2
+      entries.findLastIndex((e) => !!e) >= 0
+        ? entries.findLastIndex((e) => !!e) + 2
         : 1;
 
     const availableBox =
@@ -534,12 +534,12 @@ const ScoreCardRow = ({
             onClick={() => {
               if (entries) {
                 const firstEntryGreenBlue =
-                  entries.findIndex((e) => !!e) >= 0
-                    ? 12 - entries.findIndex((e) => !!e)
+                  entries.findLastIndex((e) => !!e) >= 0
+                    ? 12 - entries.findLastIndex((e) => !!e)
                     : 13;
                 const firstEntryRedYellow =
-                  entries.findIndex((e) => !!e) >= 0
-                    ? entries.findIndex((e) => !!e) + 2
+                  entries.findLastIndex((e) => !!e) >= 0
+                    ? entries.findLastIndex((e) => !!e) + 2
                     : 1;
 
                 const availableBox =
