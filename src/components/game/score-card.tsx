@@ -593,6 +593,16 @@ const ScoreCardRow = ({
       : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
   );
 
+  const currentMarkMakesFive = () => {
+    if (entries) {
+      const numberOfEntries: number = entries.filter(e => !!e).length;
+      const numberOfSameColorMarks: number =  marks?.find(m => Object.keys(m).includes(ColorRow[color as keyof typeof ColorRow])) ? 1 : 0;
+      console.log(numberOfEntries, numberOfSameColorMarks, color)
+      return  numberOfEntries + numberOfSameColorMarks > 3
+    } 
+    return false
+  }
+
   return (
     <div className={joinClassNames(colorSwitch(color), "py-2")}>
       <div className="flex items-center py-1">
@@ -630,6 +640,8 @@ const ScoreCardRow = ({
                   availableBox &&
                   (lock ?
                     wasRowLockedOnCurrentDiceRoll : true) &&
+                   (boxIdx === 10 ? currentMarkMakesFive() : true)
+                  &&
                   updateCard({ color, boxIdx });
               }
             }}
