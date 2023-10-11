@@ -226,7 +226,10 @@ export const ScoreCard = ({
   const wasRowLockedOnCurrentDiceRoll = useMemo(() => {
     let lockedEntryOnCurrentDiceRoll = false
     const lockedEntry = game?.scoreCards.forEach(sc => {
-      const found = sc.scoreCardEntries.find(sce => !!sce.redLock || !!sce.yellowLock || sce.blueLock || sce.greenLock)
+      const found = sc.scoreCardEntries.find(sce => 
+         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        !!sce.redLock || !!sce.yellowLock || sce.blueLock || sce.greenLock
+        )
       const lockedDiceRoll = found?.diceRollId
       if (lockedDiceRoll && (lockedDiceRoll === game?.diceRolls?.[0]?.id)) {
         lockedEntryOnCurrentDiceRoll = true
