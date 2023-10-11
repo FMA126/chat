@@ -62,11 +62,13 @@ enum PenaltyRow {
 }
 
 // Todo
-// lock out row
+// 2 locked rows ends game
+  // final entry for all players
 // all penalty boxes marked ends game
+  // final entry for all players
 // game over
-// totals
-// winner
+  // view with totals
+  // winner
 // leaderboard
 
 export const ScoreCard = ({
@@ -364,6 +366,7 @@ export const ScoreCard = ({
         gameId: router.query.gid as string,
         scoreCardId,
         diceRollId,
+        isFinalEntry: false, //hardcoded
         entry:mapLock ? [...marks, mapLock]: marks,
       });
   };

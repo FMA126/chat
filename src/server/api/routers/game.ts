@@ -172,6 +172,7 @@ export const gameRouter = createTRPCRouter({
         gameId: z.string(),
         scoreCardId: z.number(),
         diceRollId: z.number(),
+        isFinalEntry: z.boolean(),
         entry: z.array(
           z.object({
             redRow: z.number().optional(),
