@@ -62,13 +62,15 @@ enum PenaltyRow {
 }
 
 // Todo
-// lock row if game is still going???
 // all penalty boxes marked ends game
-// final entry for all players
-// game over
-// view with totals
-// winner
+// player whos turn it is can't pass
+// loading state to prevent multiple button presses (animations?)
 // leaderboard
+
+// Nice to haves
+// chat??
+// ui improvements
+// animations
 
 export const ScoreCard = ({
   playerName,
@@ -258,6 +260,7 @@ export const ScoreCard = ({
     game?.scoreCards[0]?.yellowLock,
     game?.scoreCards[0]?.blueLock,
     game?.scoreCards[0]?.greenLock,
+    game?.diceRolls,
   ]);
 
   const updateCard = ({ color, boxIdx }: { color: string; boxIdx: number }) => {
@@ -624,6 +627,7 @@ export const ScoreCard = ({
             game?.scoreCards.find((sc) => sc.userId === playerId)?.penaltyTotal
           }
           total={game?.scoreCards.find((sc) => sc.userId === playerId)?.total}
+          gameState={game?.gameState ?? undefined}
         />
       </div>
     </>
@@ -665,7 +669,7 @@ const ScoreCardRow = ({
       : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
   );
 
-  const currentMarkMakesFive = () => {
+  const currentMarkMakesFive = useMemo(() => {
     if (entries) {
       const numberOfEntries: number = entries.filter((e) => !!e).length;
       const numberOfSameColorMarks: number = marks?.find((m) =>
@@ -673,11 +677,11 @@ const ScoreCardRow = ({
       )
         ? 1
         : 0;
-      console.log(numberOfEntries, numberOfSameColorMarks, color);
+
       return numberOfEntries + numberOfSameColorMarks > 3;
     }
     return false;
-  };
+  }, [entries, marks, color]);
 
   return (
     <div className={joinClassNames(colorSwitch(color), "py-2")}>
@@ -702,6 +706,19 @@ const ScoreCardRow = ({
                   color === "green" || color === "blue"
                     ? box < firstEntryGreenBlue
                     : box > firstEntryRedYellow;
+                console.log(
+                  !(entries && !!entries[boxIdx]),
+                  dice &&
+                    dice.whiteOne + dice[color as keyof typeof DiceColor] ===
+                      box,
+                  isEditing,
+                  isMyCard,
+                  isMyTurn,
+                  entries,
+                  lock ? wasRowLockedOnCurrentDiceRoll : true,
+                  boxIdx === 10 ? currentMarkMakesFive : true,
+                  markableBox && markableBox(color, box, entries)
+                );
 
                 isMyCard &&
                   isEditing &&
@@ -717,7 +734,7 @@ const ScoreCardRow = ({
                   !(entries && !!entries[boxIdx]) &&
                   availableBox &&
                   (lock ? wasRowLockedOnCurrentDiceRoll : true) &&
-                  (boxIdx === 10 ? currentMarkMakesFive() : true) &&
+                  (boxIdx === 10 ? currentMarkMakesFive : true) &&
                   updateCard({ color, boxIdx });
               }
             }}
@@ -741,6 +758,7 @@ const ScoreCardRow = ({
                   entries &&
                   markableBox &&
                   (lock ? wasRowLockedOnCurrentDiceRoll : true) &&
+                  (boxIdx === 10 ? currentMarkMakesFive : true) &&
                   markableBox(color, box, entries)
                   ? "animate-pulse"
                   : "",
@@ -754,6 +772,7 @@ const ScoreCardRow = ({
                   entries &&
                   markableBox &&
                   (lock ? wasRowLockedOnCurrentDiceRoll : true) &&
+                  (boxIdx === 10 ? currentMarkMakesFive : true) &&
                   markableBox(color, box, entries)
                   ? "animate-pulse"
                   : "",
@@ -767,6 +786,7 @@ const ScoreCardRow = ({
                   entries &&
                   markableBox &&
                   (lock ? wasRowLockedOnCurrentDiceRoll : true) &&
+                  (boxIdx === 10 ? currentMarkMakesFive : true) &&
                   markableBox(color, box, entries)
                   ? "animate-pulse"
                   : "",
@@ -927,6 +947,7 @@ const ScoreCardTotalRow = ({
   greenTotal,
   penaltyTotal,
   total,
+  gameState,
 }: {
   redTotal?: number;
   yellowTotal?: number;
@@ -934,6 +955,7 @@ const ScoreCardTotalRow = ({
   greenTotal?: number;
   penaltyTotal?: number;
   total?: number;
+  gameState?: string;
 }) => {
   return (
     <div className="flex items-center justify-center gap-2 bg-gray-400 py-2">
@@ -943,7 +965,7 @@ const ScoreCardTotalRow = ({
           "h-8 w-32 rounded-xl rounded-xl border-2 border-[#7b0200] bg-[#fed0d0] text-center"
         )}
       >
-        {redTotal}
+        {gameState === "over" && redTotal}
       </div>
       <div className="">+</div>
       <div
@@ -951,7 +973,7 @@ const ScoreCardTotalRow = ({
           "h-8 w-32 rounded-xl border-2 border-[#946704] bg-[#fffece] text-center"
         )}
       >
-        {yellowTotal}
+        {gameState === "over" && yellowTotal}
       </div>
       <div className="">+</div>
       <div
@@ -959,7 +981,7 @@ const ScoreCardTotalRow = ({
           "h-8 w-32 rounded-xl border-2 border-[#f1fdf0] bg-[#f1fdf0] text-center"
         )}
       >
-        {blueTotal}
+        {gameState === "over" && blueTotal}
       </div>
       <div className="">+</div>
       <div
@@ -967,7 +989,7 @@ const ScoreCardTotalRow = ({
           "h-8 w-32 rounded-xl border-2 border-[#023464] bg-[#e0e1ff] text-center"
         )}
       >
-        {greenTotal}
+        {gameState === "over" && greenTotal}
       </div>
       <div className="">-</div>
       <div
@@ -975,11 +997,11 @@ const ScoreCardTotalRow = ({
           "h-8 w-32 rounded-xl rounded-xl border-2 border-black bg-white text-center"
         )}
       >
-        {penaltyTotal}
+        {gameState === "over" && penaltyTotal}
       </div>
       <div className="">=</div>
       <div className="h-8 w-64 rounded-xl border-2 border-black bg-white text-center">
-        {total}
+        {gameState === "over" && total}
       </div>
     </div>
   );
