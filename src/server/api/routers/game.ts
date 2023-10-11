@@ -233,12 +233,18 @@ export const gameRouter = createTRPCRouter({
         }
       }
       if (isFinalEntry) {
-        const game = await ctx.prisma.game.findFirstOrThrow({
+        const game = await ctx.prisma.game.findFirst({
           where: { id: +gameId },
         });
+        let finalNumber = 0;
+        if (game?.finalEntryCount) {
+          finalNumber = +game?.finalEntryCount + 1;
+        }
         const updatedGame = await ctx.prisma.game.update({
           where: { id: +gameId },
-          data: { finalEntryCount: game?.finalEntryCount + 1 },
+          data: {
+            finalEntryCount: finalNumber + 1,
+          },
           select: { id: true, finalEntryCount: true },
         });
         const redRows = await ctx.prisma.scoreCardEntry.findMany({

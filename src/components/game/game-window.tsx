@@ -23,10 +23,20 @@ export const GameWindow = () => {
   );
 
   const finalMove = useMemo(() => {
-    const card = game?.scoreCards?.[0]
-    const lockList = [card?.redLock, card?.yellowLock, card?.blueLock, card?.greenLock].filter(c => !!c)?.length
-    return lockList > 1
-  }, [game?.scoreCards[0]?.redLock, game?.scoreCards[0]?.yellowLock, game?.scoreCards[0]?.blueLock, game?.scoreCards[0]?.greenLock, ])
+    const card = game?.scoreCards?.[0];
+    const lockList = [
+      card?.redLock,
+      card?.yellowLock,
+      card?.blueLock,
+      card?.greenLock,
+    ].filter((c) => !!c)?.length;
+    return lockList > 1;
+  }, [
+    game?.scoreCards[0]?.redLock,
+    game?.scoreCards[0]?.yellowLock,
+    game?.scoreCards[0]?.blueLock,
+    game?.scoreCards[0]?.greenLock,
+  ]);
 
   if (!session || !game)
     return (
@@ -60,18 +70,22 @@ export const GameWindow = () => {
             </div>
           ))}
         </div>
-        {game.gameState === 'over' && !!game.winner ? (<div>winner: {game.scoreCards.find(sc => sc.userId === game.winner)?.user.name}</div>):
-        
-        <div className="p-2">
-          <DiceRoll
-            players={game?.scoreCards?.map((card) => ({
-              name: card.user.name,
-              userId: card.user.id,
-              cardId: card.id,
-            }))}
-          />
-        </div>
-        }
+        {game.gameState === "over" && !!game.winner ? (
+          <div className="text-center">
+            winner:{" "}
+            {game.scoreCards.find((sc) => sc.userId === game.winner)?.user.name}
+          </div>
+        ) : (
+          <div className="p-2">
+            <DiceRoll
+              players={game?.scoreCards?.map((card) => ({
+                name: card.user.name,
+                userId: card.user.id,
+                cardId: card.id,
+              }))}
+            />
+          </div>
+        )}
         <div className="">
           <ScoreCardViewSelect setCardView={setCardView} />
         </div>
@@ -85,7 +99,7 @@ export const GameWindow = () => {
             />
           ) : (
             <div className="max-h-[60vh] overflow-auto">
-              <PlayersScoreCards finalMove={finalMove}/>
+              <PlayersScoreCards finalMove={finalMove} />
             </div>
           )}
         </div>

@@ -64,22 +64,22 @@ enum PenaltyRow {
 // Todo
 // lock row if game is still going???
 // all penalty boxes marked ends game
-  // final entry for all players
+// final entry for all players
 // game over
-  // view with totals
-  // winner
+// view with totals
+// winner
 // leaderboard
 
 export const ScoreCard = ({
   playerName,
   playerId,
   isMyCard,
-  finalMove
+  finalMove,
 }: {
   playerName: string;
   playerId: string;
   isMyCard: boolean;
-  finalMove: boolean
+  finalMove: boolean;
 }) => {
   const session = useSession();
   const router = useRouter();
@@ -159,7 +159,7 @@ export const ScoreCard = ({
           rows[ColorRow.blue][12 - blue] = 1;
         }
         if (green) {
-          rows[ColorRow.green][12 -green] = 1;
+          rows[ColorRow.green][12 - green] = 1;
         }
         if (penaltyOne) {
           rows.penaltyOne = 1;
@@ -220,36 +220,54 @@ export const ScoreCard = ({
     );
   }, [game?.scoreCards, playerId]);
 
-
   const locks = useMemo(() => {
-    const lockList: [string, number][] | undefined = game?.scoreCards[0] && Object.entries(game?.scoreCards[0]).filter(sc => (sc[0] === 'redLock' && !!sc[1]) || (sc[0] === 'yellowLock' && !!sc[1]) || (sc[0] === 'blueLock' && !!sc[1]) || (sc[0] === 'greenLock' && !!sc[1])) as [string, number][]
-    
-    return lockList
-  }, [game?.scoreCards[0]?.redLock, game?.scoreCards[0]?.yellowLock, game?.scoreCards[0]?.blueLock, game?.scoreCards[0]?.greenLock])
+    const lockList: [string, number][] | undefined =
+      game?.scoreCards[0] &&
+      (Object.entries(game?.scoreCards[0]).filter(
+        (sc) =>
+          (sc[0] === "redLock" && !!sc[1]) ||
+          (sc[0] === "yellowLock" && !!sc[1]) ||
+          (sc[0] === "blueLock" && !!sc[1]) ||
+          (sc[0] === "greenLock" && !!sc[1])
+      ) as [string, number][]);
+
+    return lockList;
+  }, [
+    game?.scoreCards[0]?.redLock,
+    game?.scoreCards[0]?.yellowLock,
+    game?.scoreCards[0]?.blueLock,
+    game?.scoreCards[0]?.greenLock,
+  ]);
 
   const wasRowLockedOnCurrentDiceRoll = useMemo(() => {
-    let lockedEntryOnCurrentDiceRoll = false
-    const lockedEntry = game?.scoreCards.forEach(sc => {
-      const found = sc.scoreCardEntries.find(sce => 
-         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        !!sce.redLock || !!sce.yellowLock || sce.blueLock || sce.greenLock
-        )
-      const lockedDiceRoll = found?.diceRollId
-      if (lockedDiceRoll && (lockedDiceRoll === game?.diceRolls?.[0]?.id)) {
-        lockedEntryOnCurrentDiceRoll = true
+    let lockedEntryOnCurrentDiceRoll = false;
+    const lockedEntry = game?.scoreCards.forEach((sc) => {
+      const found = sc.scoreCardEntries.find(
+        (sce) =>
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+          !!sce.redLock || !!sce.yellowLock || sce.blueLock || sce.greenLock
+      );
+      const lockedDiceRoll = found?.diceRollId;
+      if (lockedDiceRoll && lockedDiceRoll === game?.diceRolls?.[0]?.id) {
+        lockedEntryOnCurrentDiceRoll = true;
       }
-    
-    })
-    return lockedEntryOnCurrentDiceRoll
-  }, [game?.scoreCards[0]?.redLock, game?.scoreCards[0]?.yellowLock, game?.scoreCards[0]?.blueLock, game?.scoreCards[0]?.greenLock])
+    });
+    return lockedEntryOnCurrentDiceRoll;
+  }, [
+    game?.scoreCards[0]?.redLock,
+    game?.scoreCards[0]?.yellowLock,
+    game?.scoreCards[0]?.blueLock,
+    game?.scoreCards[0]?.greenLock,
+  ]);
 
   const updateCard = ({ color, boxIdx }: { color: string; boxIdx: number }) => {
     setMarks((prev) => {
       const rowName = ColorRow[color as keyof typeof ColorRow];
       const isMyTurn = game?.diceRolls[0]?.userId === session.data?.user.id;
-      const duplicateMarkIdx = prev.findIndex(
-        (m) =>
-          color === 'red' || color === 'yelow' ? Object.keys(m)[0] === rowName && Object.values(m)[0] === boxIdx + 2 : Object.keys(m)[0] === rowName && Object.values(m)[0] === 12 - boxIdx 
+      const duplicateMarkIdx = prev.findIndex((m) =>
+        color === "red" || color === "yelow"
+          ? Object.keys(m)[0] === rowName && Object.values(m)[0] === boxIdx + 2
+          : Object.keys(m)[0] === rowName && Object.values(m)[0] === 12 - boxIdx
       );
       const penaltyIdx = prev.findIndex(
         (m) =>
@@ -272,20 +290,39 @@ export const ScoreCard = ({
         }
         if (prev.length === 0) {
           const newMark = {} as Mark;
-          newMark[rowName] = color === 'red' || color === 'yellow' ? boxIdx + 2 : 12 - boxIdx;
+          newMark[rowName] =
+            color === "red" || color === "yellow" ? boxIdx + 2 : 12 - boxIdx;
           return [{ ...newMark }] as Mark[];
         }
         if (penaltyIdx > -1) {
-          return [{ [rowName]: color === 'red' || color === 'yellow' ? boxIdx + 2 : 12 - boxIdx }] as Mark[];
+          return [
+            {
+              [rowName]:
+                color === "red" || color === "yellow"
+                  ? boxIdx + 2
+                  : 12 - boxIdx,
+            },
+          ] as Mark[];
         }
-        return [...prev, { [rowName]: color === 'red' || color === 'yellow' ? boxIdx + 2 : 12 - boxIdx }] as Mark[];
+        return [
+          ...prev,
+          {
+            [rowName]:
+              color === "red" || color === "yellow" ? boxIdx + 2 : 12 - boxIdx,
+          },
+        ] as Mark[];
       }
-      return [{ [rowName]: color === 'red' || color === 'yellow' ? boxIdx + 2 : 12 - boxIdx }];
+      return [
+        {
+          [rowName]:
+            color === "red" || color === "yellow" ? boxIdx + 2 : 12 - boxIdx,
+        },
+      ];
     });
   };
 
   const updatePenalty = (penaltyIdx: number) => {
-    console.log(penaltyIdx)
+    console.log(penaltyIdx);
     if (penaltyIdx > -1) {
       const mapPenalty =
         penaltyIdx === 0
@@ -351,16 +388,26 @@ export const ScoreCard = ({
         (Object.keys(m)[0] === ColorRow.blue && Object.values(m)[0] === 2) ||
         (Object.keys(m)[0] === ColorRow.green && Object.values(m)[0] === 2)
     );
-    return lock && (Object.keys(lock)[0] as keyof Mark)
-  }
+    return lock && (Object.keys(lock)[0] as keyof Mark);
+  };
 
   const submitEntry = () => {
     const scoreCardId = game?.scoreCards.find(
       (card) => card.userId === session.data?.user.id
     )?.id;
     const diceRollId = game?.diceRolls[0]?.id;
-    const lock = lockRowColor()
-    const mapLock = lock && (lock === ColorRow.red ? {redLock: 1} : lock === ColorRow.yellow ? {yellowLock: 1} : lock === ColorRow.blue ? {blueLock: 1} : lock === ColorRow.green ? {greenLock: 1} : undefined)
+    const lock = lockRowColor();
+    const mapLock =
+      lock &&
+      (lock === ColorRow.red
+        ? { redLock: 1 }
+        : lock === ColorRow.yellow
+        ? { yellowLock: 1 }
+        : lock === ColorRow.blue
+        ? { blueLock: 1 }
+        : lock === ColorRow.green
+        ? { greenLock: 1 }
+        : undefined);
     scoreCardId &&
       diceRollId &&
       mutateScoreCardEntry({
@@ -368,7 +415,7 @@ export const ScoreCard = ({
         scoreCardId,
         diceRollId,
         isFinalEntry: finalMove,
-        entry:mapLock ? [...marks, mapLock]: marks,
+        entry: mapLock ? [...marks, mapLock] : marks,
       });
   };
 
@@ -433,7 +480,7 @@ export const ScoreCard = ({
                   className="flex gap-1 rounded-xl border border-green-900 bg-green-200/80 p-2 text-green-900"
                 >
                   <CheckBadgeIcon className="h-6 w-6 " />
-                  {marks.length === 0 ?<span>Pass</span> : <span>Save</span>}
+                  {marks.length === 0 ? <span>Pass</span> : <span>Save</span>}
                 </button>
                 <button
                   onClick={() => {
@@ -453,7 +500,7 @@ export const ScoreCard = ({
           <ScoreCardRow
             playerId={playerId}
             entries={entries[ColorRow.red]}
-            lock={!!locks?.find(l => l[0] === 'redLock')}
+            lock={!!locks?.find((l) => l[0] === "redLock")}
             wasRowLockedOnCurrentDiceRoll={wasRowLockedOnCurrentDiceRoll}
             isEditing={isEditing}
             setIsEditing={setIsEditing}
@@ -475,7 +522,7 @@ export const ScoreCard = ({
           <ScoreCardRow
             playerId={playerId}
             entries={entries[ColorRow.yellow]}
-            lock={!!locks?.find(l => l[0] === 'yellowLock')}
+            lock={!!locks?.find((l) => l[0] === "yellowLock")}
             wasRowLockedOnCurrentDiceRoll={wasRowLockedOnCurrentDiceRoll}
             isEditing={isEditing}
             setIsEditing={setIsEditing}
@@ -497,7 +544,7 @@ export const ScoreCard = ({
           <ScoreCardRow
             playerId={playerId}
             entries={entries[ColorRow.green]}
-            lock={!!locks?.find(l => l[0] === 'greenLock')}
+            lock={!!locks?.find((l) => l[0] === "greenLock")}
             wasRowLockedOnCurrentDiceRoll={wasRowLockedOnCurrentDiceRoll}
             isEditing={isEditing}
             setIsEditing={setIsEditing}
@@ -519,7 +566,7 @@ export const ScoreCard = ({
           <ScoreCardRow
             playerId={playerId}
             entries={entries[ColorRow.blue]}
-            lock={!!locks?.find(l => l[0] === 'blueLock')}
+            lock={!!locks?.find((l) => l[0] === "blueLock")}
             wasRowLockedOnCurrentDiceRoll={wasRowLockedOnCurrentDiceRoll}
             isEditing={isEditing}
             setIsEditing={setIsEditing}
@@ -559,7 +606,25 @@ export const ScoreCard = ({
             updatePenalty={updatePenalty}
           />
         </div>
-        <ScoreCardTotalRow redTotal={game?.scoreCards.find(sc => sc.userId === playerId)?.redRowTotal} yellowTotal={game?.scoreCards.find(sc => sc.userId === playerId)?.yellowRowTotal} blueTotal={game?.scoreCards.find(sc => sc.userId === playerId)?.blueRowTotal} greenTotal={game?.scoreCards.find(sc => sc.userId === playerId)?.greenRowTotal} penaltyTotal={game?.scoreCards.find(sc => sc.userId === playerId)?.penaltyTotal} total={game?.scoreCards.find(sc => sc.userId === playerId)?.total}/>
+        <ScoreCardTotalRow
+          redTotal={
+            game?.scoreCards?.find((sc) => sc.userId === playerId)?.redRowTotal
+          }
+          yellowTotal={
+            game?.scoreCards.find((sc) => sc.userId === playerId)
+              ?.yellowRowTotal
+          }
+          blueTotal={
+            game?.scoreCards.find((sc) => sc.userId === playerId)?.blueRowTotal
+          }
+          greenTotal={
+            game?.scoreCards.find((sc) => sc.userId === playerId)?.greenRowTotal
+          }
+          penaltyTotal={
+            game?.scoreCards.find((sc) => sc.userId === playerId)?.penaltyTotal
+          }
+          total={game?.scoreCards.find((sc) => sc.userId === playerId)?.total}
+        />
       </div>
     </>
   );
@@ -587,7 +652,7 @@ const ScoreCardRow = ({
   playerId?: string;
   entries?: number[];
   lock?: boolean;
-  wasRowLockedOnCurrentDiceRoll?: boolean
+  wasRowLockedOnCurrentDiceRoll?: boolean;
   isEditing?: boolean;
   setIsEditing?: Dispatch<SetStateAction<boolean>>;
   marks?: Mark[];
@@ -595,20 +660,24 @@ const ScoreCardRow = ({
   markableBox?: (color: string, box: number, entries: number[]) => boolean;
 }) => {
   const [row, setRow] = useState(() =>
-    (color === "green" || color === "blue")
+    color === "green" || color === "blue"
       ? [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2]
       : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
   );
 
   const currentMarkMakesFive = () => {
     if (entries) {
-      const numberOfEntries: number = entries.filter(e => !!e).length;
-      const numberOfSameColorMarks: number =  marks?.find(m => Object.keys(m).includes(ColorRow[color as keyof typeof ColorRow])) ? 1 : 0;
-      console.log(numberOfEntries, numberOfSameColorMarks, color)
-      return  numberOfEntries + numberOfSameColorMarks > 3
-    } 
-    return false
-  }
+      const numberOfEntries: number = entries.filter((e) => !!e).length;
+      const numberOfSameColorMarks: number = marks?.find((m) =>
+        Object.keys(m).includes(ColorRow[color as keyof typeof ColorRow])
+      )
+        ? 1
+        : 0;
+      console.log(numberOfEntries, numberOfSameColorMarks, color);
+      return numberOfEntries + numberOfSameColorMarks > 3;
+    }
+    return false;
+  };
 
   return (
     <div className={joinClassNames(colorSwitch(color), "py-2")}>
@@ -639,16 +708,16 @@ const ScoreCardRow = ({
                   updateCard &&
                   dice &&
                   (dice?.whiteOne + dice?.whiteTwo === box ||
-                    (isMyTurn && (dice.whiteOne + dice[color as keyof typeof DiceColor] ===
-                      box ||
-                    dice.whiteTwo + dice[color as keyof typeof DiceColor] ===
-                      box))) &&
+                    (isMyTurn &&
+                      (dice.whiteOne + dice[color as keyof typeof DiceColor] ===
+                        box ||
+                        dice.whiteTwo +
+                          dice[color as keyof typeof DiceColor] ===
+                          box))) &&
                   !(entries && !!entries[boxIdx]) &&
                   availableBox &&
-                  (lock ?
-                    wasRowLockedOnCurrentDiceRoll : true) &&
-                   (boxIdx === 10 ? currentMarkMakesFive() : true)
-                  &&
+                  (lock ? wasRowLockedOnCurrentDiceRoll : true) &&
+                  (boxIdx === 10 ? currentMarkMakesFive() : true) &&
                   updateCard({ color, boxIdx });
               }
             }}
@@ -656,10 +725,12 @@ const ScoreCardRow = ({
             <div
               className={joinClassNames(
                 innerBoxColor(color),
-                marks?.find(
-                  (m) =>
-                    (color === 'red' || color === 'yellow') ? m[ColorRow[color as keyof typeof ColorRow]] === boxIdx + 2 : m[ColorRow[color as keyof typeof ColorRow]] === 12 - boxIdx
-              )
+                marks?.find((m) =>
+                  color === "red" || color === "yellow"
+                    ? m[ColorRow[color as keyof typeof ColorRow]] === boxIdx + 2
+                    : m[ColorRow[color as keyof typeof ColorRow]] ===
+                      12 - boxIdx
+                )
                   ? "border-slate-900 bg-cyan-300 text-white"
                   : "",
                 !(entries && !!entries[boxIdx]) &&
@@ -669,8 +740,7 @@ const ScoreCardRow = ({
                   isMyCard &&
                   entries &&
                   markableBox &&
-                  (lock ?
-                  wasRowLockedOnCurrentDiceRoll : true) &&
+                  (lock ? wasRowLockedOnCurrentDiceRoll : true) &&
                   markableBox(color, box, entries)
                   ? "animate-pulse"
                   : "",
@@ -683,8 +753,7 @@ const ScoreCardRow = ({
                   isMyTurn &&
                   entries &&
                   markableBox &&
-                  (lock ?
-                    wasRowLockedOnCurrentDiceRoll : true) &&
+                  (lock ? wasRowLockedOnCurrentDiceRoll : true) &&
                   markableBox(color, box, entries)
                   ? "animate-pulse"
                   : "",
@@ -697,8 +766,7 @@ const ScoreCardRow = ({
                   isMyTurn &&
                   entries &&
                   markableBox &&
-                  (lock ?
-                    wasRowLockedOnCurrentDiceRoll : true) &&
+                  (lock ? wasRowLockedOnCurrentDiceRoll : true) &&
                   markableBox(color, box, entries)
                   ? "animate-pulse"
                   : "",
@@ -715,11 +783,11 @@ const ScoreCardRow = ({
         ))}
         <div className={joinClassNames("flex grow justify-center rounded-lg")}>
           <div className={joinClassNames(innerBoxColor(color), "h-8 w-8 p-1")}>
-            {
-              lock ?  
-            <LockClosedIcon className={joinClassNames(iconColor(color))} /> :
-            <LockOpenIcon className={joinClassNames(iconColor(color))} />
-            }
+            {lock ? (
+              <LockClosedIcon className={joinClassNames(iconColor(color))} />
+            ) : (
+              <LockOpenIcon className={joinClassNames(iconColor(color))} />
+            )}
           </div>
         </div>
       </div>
@@ -736,7 +804,7 @@ const ScoreCardLegendPenaltyRow = ({
   updateCard,
   marks,
   updatePenalty,
-  isMyCard
+  isMyCard,
 }: {
   dice?: Dice;
   isEditing?: boolean;
@@ -812,7 +880,10 @@ const ScoreCardLegendPenaltyRow = ({
         </div>
         <button
           onClick={() => {
-            entries && updatePenalty && isEditing && isMyCard &&
+            entries &&
+              updatePenalty &&
+              isEditing &&
+              isMyCard &&
               updatePenalty(entries?.findIndex((e) => e === 0));
           }}
           disabled={entries && entries?.filter((e) => e).length > 3}
@@ -827,8 +898,11 @@ const ScoreCardLegendPenaltyRow = ({
               <div
                 key={pIdx}
                 className={joinClassNames(
-                  marks?.find((m) => m[PenaltyRow[penaltyName as keyof typeof PenaltyRow]] ===
-                      1)
+                  marks?.find(
+                    (m) =>
+                      m[PenaltyRow[penaltyName as keyof typeof PenaltyRow]] ===
+                      1
+                  )
                     ? "bg-cyan-300 text-white"
                     : "bg-white",
                   "h-6 w-6 rounded-md border-2 border-black"
@@ -846,41 +920,67 @@ const ScoreCardLegendPenaltyRow = ({
   );
 };
 
-const ScoreCardTotalRow = ({redTotal, yellowTotal, blueTotal, greenTotal, penaltyTotal, total}:{redTotal?: number; yellowTotal?: number; blueTotal?: number; greenTotal?: number; penaltyTotal?: number; total?: number;}) => {
+const ScoreCardTotalRow = ({
+  redTotal,
+  yellowTotal,
+  blueTotal,
+  greenTotal,
+  penaltyTotal,
+  total,
+}: {
+  redTotal?: number;
+  yellowTotal?: number;
+  blueTotal?: number;
+  greenTotal?: number;
+  penaltyTotal?: number;
+  total?: number;
+}) => {
   return (
     <div className="flex items-center justify-center gap-2 bg-gray-400 py-2">
       <div className="">totals</div>
       <div
         className={joinClassNames(
-          "h-8 w-32 rounded-xl rounded-xl border-2 border-[#7b0200] bg-[#fed0d0]"
+          "h-8 w-32 rounded-xl rounded-xl border-2 border-[#7b0200] bg-[#fed0d0] text-center"
         )}
-      >{redTotal}</div>
+      >
+        {redTotal}
+      </div>
       <div className="">+</div>
       <div
         className={joinClassNames(
-          "h-8 w-32 rounded-xl border-2 border-[#946704] bg-[#fffece]"
+          "h-8 w-32 rounded-xl border-2 border-[#946704] bg-[#fffece] text-center"
         )}
-      >{yellowTotal}</div>
+      >
+        {yellowTotal}
+      </div>
       <div className="">+</div>
       <div
         className={joinClassNames(
-          "h-8 w-32 rounded-xl border-2 border-[#f1fdf0] bg-[#f1fdf0]"
+          "h-8 w-32 rounded-xl border-2 border-[#f1fdf0] bg-[#f1fdf0] text-center"
         )}
-      >{blueTotal}</div>
+      >
+        {blueTotal}
+      </div>
       <div className="">+</div>
       <div
         className={joinClassNames(
-          "h-8 w-32 rounded-xl border-2 border-[#023464] bg-[#e0e1ff]"
+          "h-8 w-32 rounded-xl border-2 border-[#023464] bg-[#e0e1ff] text-center"
         )}
-      >{greenTotal}</div>
+      >
+        {greenTotal}
+      </div>
       <div className="">-</div>
       <div
         className={joinClassNames(
-          "h-8 w-32 rounded-xl rounded-xl border-2 border-black bg-white"
+          "h-8 w-32 rounded-xl rounded-xl border-2 border-black bg-white text-center"
         )}
-      >{penaltyTotal}</div>
+      >
+        {penaltyTotal}
+      </div>
       <div className="">=</div>
-      <div className="h-8 w-64 rounded-xl border-2 border-black bg-white">{total}</div>
+      <div className="h-8 w-64 rounded-xl border-2 border-black bg-white text-center">
+        {total}
+      </div>
     </div>
   );
 };
