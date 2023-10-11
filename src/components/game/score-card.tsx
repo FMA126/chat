@@ -62,8 +62,7 @@ enum PenaltyRow {
 }
 
 // Todo
-// 2 locked rows ends game
-  // final entry for all players
+// lock row if game is still going???
 // all penalty boxes marked ends game
   // final entry for all players
 // game over
@@ -75,10 +74,12 @@ export const ScoreCard = ({
   playerName,
   playerId,
   isMyCard,
+  finalMove
 }: {
   playerName: string;
   playerId: string;
   isMyCard: boolean;
+  finalMove: boolean
 }) => {
   const session = useSession();
   const router = useRouter();
@@ -219,6 +220,7 @@ export const ScoreCard = ({
     );
   }, [game?.scoreCards, playerId]);
 
+
   const locks = useMemo(() => {
     const lockList: [string, number][] | undefined = game?.scoreCards[0] && Object.entries(game?.scoreCards[0]).filter(sc => (sc[0] === 'redLock' && !!sc[1]) || (sc[0] === 'yellowLock' && !!sc[1]) || (sc[0] === 'blueLock' && !!sc[1]) || (sc[0] === 'greenLock' && !!sc[1])) as [string, number][]
     
@@ -353,7 +355,6 @@ export const ScoreCard = ({
   }
 
   const submitEntry = () => {
-    console.log('marks', marks)
     const scoreCardId = game?.scoreCards.find(
       (card) => card.userId === session.data?.user.id
     )?.id;
@@ -366,7 +367,7 @@ export const ScoreCard = ({
         gameId: router.query.gid as string,
         scoreCardId,
         diceRollId,
-        isFinalEntry: false, //hardcoded
+        isFinalEntry: finalMove,
         entry:mapLock ? [...marks, mapLock]: marks,
       });
   };
@@ -558,7 +559,7 @@ export const ScoreCard = ({
             updatePenalty={updatePenalty}
           />
         </div>
-        <ScoreCardTotalRow />
+        <ScoreCardTotalRow redTotal={game?.scoreCards.find(sc => sc.userId === playerId)?.redRowTotal} yellowTotal={game?.scoreCards.find(sc => sc.userId === playerId)?.yellowRowTotal} blueTotal={game?.scoreCards.find(sc => sc.userId === playerId)?.blueRowTotal} greenTotal={game?.scoreCards.find(sc => sc.userId === playerId)?.greenRowTotal} penaltyTotal={game?.scoreCards.find(sc => sc.userId === playerId)?.penaltyTotal} total={game?.scoreCards.find(sc => sc.userId === playerId)?.total}/>
       </div>
     </>
   );
@@ -845,7 +846,7 @@ const ScoreCardLegendPenaltyRow = ({
   );
 };
 
-const ScoreCardTotalRow = () => {
+const ScoreCardTotalRow = ({redTotal, yellowTotal, blueTotal, greenTotal, penaltyTotal, total}:{redTotal?: number; yellowTotal?: number; blueTotal?: number; greenTotal?: number; penaltyTotal?: number; total?: number;}) => {
   return (
     <div className="flex items-center justify-center gap-2 bg-gray-400 py-2">
       <div className="">totals</div>
@@ -853,33 +854,33 @@ const ScoreCardTotalRow = () => {
         className={joinClassNames(
           "h-8 w-32 rounded-xl rounded-xl border-2 border-[#7b0200] bg-[#fed0d0]"
         )}
-      ></div>
+      >{redTotal}</div>
       <div className="">+</div>
       <div
         className={joinClassNames(
           "h-8 w-32 rounded-xl border-2 border-[#946704] bg-[#fffece]"
         )}
-      ></div>
+      >{yellowTotal}</div>
       <div className="">+</div>
       <div
         className={joinClassNames(
           "h-8 w-32 rounded-xl border-2 border-[#f1fdf0] bg-[#f1fdf0]"
         )}
-      ></div>
+      >{blueTotal}</div>
       <div className="">+</div>
       <div
         className={joinClassNames(
           "h-8 w-32 rounded-xl border-2 border-[#023464] bg-[#e0e1ff]"
         )}
-      ></div>
+      >{greenTotal}</div>
       <div className="">-</div>
       <div
         className={joinClassNames(
           "h-8 w-32 rounded-xl rounded-xl border-2 border-black bg-white"
         )}
-      ></div>
+      >{penaltyTotal}</div>
       <div className="">=</div>
-      <div className="h-8 w-64 rounded-xl border-2 border-black bg-white"></div>
+      <div className="h-8 w-64 rounded-xl border-2 border-black bg-white">{total}</div>
     </div>
   );
 };

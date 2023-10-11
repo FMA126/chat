@@ -192,7 +192,7 @@ export const gameRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const { gameId, scoreCardId, entry, diceRollId } = input;
+      const { gameId, scoreCardId, entry, diceRollId, isFinalEntry } = input;
       const batchEntry = entry.map((e) => ({
         scoreCardId,
         diceRollId,
@@ -226,9 +226,135 @@ export const gameRouter = createTRPCRouter({
               ? { yellowLock: 1 }
               : mapLock.blueLock
               ? { blueLock: 1 }
-              : mapLock.redLock
-              ? { redLock: 1 }
+              : mapLock.greenLock
+              ? { greenLock: 1 }
               : {},
+          });
+        }
+      }
+      if (isFinalEntry) {
+        const game = await ctx.prisma.game.findFirstOrThrow({
+          where: { id: +gameId },
+        });
+        const updatedGame = await ctx.prisma.game.update({
+          where: { id: +gameId },
+          data: { finalEntryCount: game?.finalEntryCount + 1 },
+          select: { id: true, finalEntryCount: true },
+        });
+        const redRows = await ctx.prisma.scoreCardEntry.findMany({
+          where: {
+            scoreCardId,
+            OR: [{ redRow: { not: null } }, { redLock: { not: null } }],
+          },
+        });
+        const yellowRows = await ctx.prisma.scoreCardEntry.findMany({
+          where: {
+            scoreCardId,
+            OR: [{ yellowRow: { not: null } }, { yellowLock: { not: null } }],
+          },
+        });
+        const blueRows = await ctx.prisma.scoreCardEntry.findMany({
+          where: {
+            scoreCardId,
+            OR: [{ blueRow: { not: null } }, { blueLock: { not: null } }],
+          },
+        });
+        const greenRows = await ctx.prisma.scoreCardEntry.findMany({
+          where: {
+            scoreCardId,
+            OR: [{ greenRow: { not: null } }, { greenLock: { not: null } }],
+          },
+        });
+        const penalties = await ctx.prisma.scoreCardEntry.findMany({
+          where: {
+            scoreCardId,
+            OR: [
+              { penaltyOne: { not: null } },
+              { penaltyTwo: { not: null } },
+              { penaltyThree: { not: null } },
+              { penaltyFour: { not: null } },
+            ],
+          },
+        });
+        const scoreList = [0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78];
+        await ctx.prisma.scoreCard.update({
+          where: { id: scoreCardId },
+          data: {
+            redRowTotal: scoreList[redRows.length],
+            yellowRowTotal: scoreList[yellowRows.length],
+            blueRowTotal: scoreList[blueRows.length],
+            greenRowTotal: scoreList[greenRows.length],
+            penaltyTotal: penalties.length * 5,
+            total:
+              (scoreList[redRows.length] ?? 0) +
+              (scoreList[yellowRows.length] ?? 0) +
+              (scoreList[blueRows.length] ?? 0) +
+              (scoreList[greenRows.length] ?? 0) -
+              (penalties.length * 5 ?? 0),
+          },
+        });
+
+        const numberOfPlayers = [
+          game?.playerOne,
+          game?.playerTwo,
+          game?.playerThree,
+          game?.playerFour,
+          game?.playerFive,
+        ].filter((p) => !!p)?.length;
+
+        if (updatedGame.finalEntryCount + 1 === numberOfPlayers) {
+          const lastScoreCard = await ctx.prisma.scoreCard.findFirst({
+            where: { gameId: +gameId, total: 0 },
+          });
+          const lastRedRows = await ctx.prisma.scoreCardEntry.findMany({
+            where: { scoreCardId: lastScoreCard?.id, redRow: { not: null } },
+          });
+          const lastYellowRows = await ctx.prisma.scoreCardEntry.findMany({
+            where: { scoreCardId: lastScoreCard?.id, yellowRow: { not: null } },
+          });
+          const lastBlueRows = await ctx.prisma.scoreCardEntry.findMany({
+            where: { scoreCardId: lastScoreCard?.id, blueRow: { not: null } },
+          });
+          const lastGreenRows = await ctx.prisma.scoreCardEntry.findMany({
+            where: { scoreCardId: lastScoreCard?.id, greenRow: { not: null } },
+          });
+          const lastPenalties = await ctx.prisma.scoreCardEntry.findMany({
+            where: {
+              scoreCardId: lastScoreCard?.id,
+              OR: [
+                { penaltyOne: { not: null } },
+                { penaltyTwo: { not: null } },
+                { penaltyThree: { not: null } },
+                { penaltyFour: { not: null } },
+              ],
+            },
+          });
+          const scoreList = [0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78];
+          await ctx.prisma.scoreCard.update({
+            where: { id: lastScoreCard?.id },
+            data: {
+              redRowTotal: scoreList[lastRedRows.length],
+              yellowRowTotal: scoreList[lastYellowRows.length],
+              blueRowTotal: scoreList[lastBlueRows.length],
+              greenRowTotal: scoreList[lastGreenRows.length],
+              penaltyTotal: lastPenalties.length * 5,
+              total:
+                (scoreList[lastRedRows.length] ?? 0) +
+                (scoreList[lastYellowRows.length] ?? 0) +
+                (scoreList[lastBlueRows.length] ?? 0) +
+                (scoreList[lastGreenRows.length] ?? 0) -
+                (lastPenalties.length * 5 ?? 0),
+            },
+          });
+
+          const winnerList = await ctx.prisma.scoreCard.findMany({
+            where: { gameId: +gameId },
+            orderBy: { total: "desc" },
+          });
+
+          await ctx.prisma.game.update({
+            where: { id: +gameId },
+            data: { gameState: "over", winner: winnerList[0]?.userId },
           });
         }
       }

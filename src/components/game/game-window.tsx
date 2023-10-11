@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DiceRoll } from "./dice-roll";
 import { GameNav } from "./game-nav";
 import { ScoreCardViewSelect } from "./score-card-view-select";
@@ -21,6 +21,12 @@ export const GameWindow = () => {
     },
     { enabled: !!router.query.gid }
   );
+
+  const finalMove = useMemo(() => {
+    const card = game?.scoreCards?.[0]
+    const lockList = [card?.redLock, card?.yellowLock, card?.blueLock, card?.greenLock].filter(c => !!c)?.length
+    return lockList > 1
+  }, [game?.scoreCards[0]?.redLock, game?.scoreCards[0]?.yellowLock, game?.scoreCards[0]?.blueLock, game?.scoreCards[0]?.greenLock, ])
 
   if (!session || !game)
     return (
@@ -54,6 +60,8 @@ export const GameWindow = () => {
             </div>
           ))}
         </div>
+        {game.gameState === 'over' && !!game.winner ? (<div>winner: {game.scoreCards.find(sc => sc.userId === game.winner)?.user.name}</div>):
+        
         <div className="p-2">
           <DiceRoll
             players={game?.scoreCards?.map((card) => ({
@@ -63,6 +71,7 @@ export const GameWindow = () => {
             }))}
           />
         </div>
+        }
         <div className="">
           <ScoreCardViewSelect setCardView={setCardView} />
         </div>
@@ -72,10 +81,11 @@ export const GameWindow = () => {
               playerName={session?.data?.user?.name ?? "no name"}
               playerId={session?.data?.user?.id ?? "-1"}
               isMyCard={true}
+              finalMove={finalMove}
             />
           ) : (
             <div className="max-h-[60vh] overflow-auto">
-              <PlayersScoreCards />
+              <PlayersScoreCards finalMove={finalMove}/>
             </div>
           )}
         </div>
