@@ -19,6 +19,7 @@ import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
+import Spinner from "../shared/spinner";
 
 interface Dice {
   whiteOne: number;
@@ -87,7 +88,11 @@ export const ScoreCard = ({
   const [isEditing, setIsEditing] = useState(false);
   const [marks, setMarks] = useState<Mark[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { data: game } = api.game.byId.useQuery(
+  const {
+    data: game,
+    refetch,
+    isFetching,
+  } = api.game.byId.useQuery(
     {
       id: router.query.gid as string,
     },
@@ -121,12 +126,15 @@ export const ScoreCard = ({
       },
       onError() {
         toast.error("Error updating card");
-        setIsSubmitting(true);
+        setIsSubmitting(false);
       },
       onSuccess() {
         toast.success("Nice move!");
-        setIsSubmitting(true);
+        setIsSubmitting(false);
         setMarks([]);
+      },
+      async onSettled() {
+        await refetch();
       },
     });
 
@@ -486,24 +494,42 @@ export const ScoreCard = ({
             </div>
             {isMyCard && isEditing && (
               <div className="flex grow items-center justify-center gap-2 md:gap-4">
-                <button
-                  onClick={() => {
-                    submitEntry();
-                  }}
-                  className="flex gap-1 rounded-xl border border-green-900 bg-green-200/80 p-2 text-green-900"
-                >
-                  <CheckBadgeIcon className="h-6 w-6 " />
-                  {marks.length === 0 ? <span>Pass</span> : <span>Save</span>}
-                </button>
-                <button
-                  onClick={() => {
-                    setMarks([]);
-                  }}
-                  className="flex gap-1 rounded-xl border border-red-900 bg-red-200/80 p-2 text-red-900"
-                >
-                  <XMarkIcon className="h-6 w-6 " />
-                  <span>Clear</span>
-                </button>
+                {!isFetching ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        submitEntry();
+                      }}
+                      className="flex gap-1 rounded-xl border border-green-900 bg-green-200/80 p-2 text-green-900"
+                      disabled={isSubmitting}
+                    >
+                      <CheckBadgeIcon className="h-6 w-6 " />
+                      {isSubmitting ? (
+                        <Spinner height="6" width="6" color="green-900" />
+                      ) : marks.length === 0 ? (
+                        <span>Pass</span>
+                      ) : (
+                        <span>Save</span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMarks([]);
+                      }}
+                      className="flex gap-1 rounded-xl border border-red-900 bg-red-200/80 p-2 text-red-900"
+                      disabled={isSubmitting}
+                    >
+                      <XMarkIcon className="h-6 w-6 " />
+                      {isSubmitting ? (
+                        <Spinner height="6" width="6" color="red-900" />
+                      ) : (
+                        <span>Clear</span>
+                      )}
+                    </button>
+                  </>
+                ) : (
+                  <div></div>
+                )}
               </div>
             )}
             <div className="w-1/6 rounded-t-lg border-l-2 border-r-2 border-t-2 border-black">
@@ -790,7 +816,7 @@ const ScoreCardRow = ({
               )}
             >
               {entries && !!entries[boxIdx] ? (
-                <XMarkIcon className="h-8 w-8 self-center" />
+                <XMarkIcon className="h-6 w-6 self-center md:h-8 md:h-8" />
               ) : (
                 <p>{box}</p>
               )}
@@ -977,7 +1003,7 @@ const ScoreCardTotalRow = ({
           "h-8 w-32 rounded-xl border-2 border-[#f1fdf0] bg-[#f1fdf0] text-center"
         )}
       >
-        {gameState === "over" && blueTotal}
+        {gameState === "over" && greenTotal}
       </div>
       <div className="">+</div>
       <div
@@ -985,7 +1011,7 @@ const ScoreCardTotalRow = ({
           "h-8 w-32 rounded-xl border-2 border-[#023464] bg-[#e0e1ff] text-center"
         )}
       >
-        {gameState === "over" && greenTotal}
+        {gameState === "over" && blueTotal}
       </div>
       <div className="">-</div>
       <div

@@ -24,11 +24,16 @@ export function DiceRoll({
 
   const session = useSession();
   const router = useRouter();
-  const { data: game } = api.game.byId.useQuery(
+  const { data: game, isFetching } = api.game.byId.useQuery(
     {
       id: router.query.gid as string,
     },
-    { enabled: !!router.query.gid }
+    {
+      onSettled: () => {
+        setIsRolling(false);
+      },
+      enabled: !!router.query.gid,
+    }
   );
 
   const { data: dice } = api.game.getDiceRoll.useQuery({
@@ -41,9 +46,6 @@ export function DiceRoll({
     },
     onError() {
       toast.error("Error rolling dice");
-      setIsRolling(false);
-    },
-    onSuccess() {
       setIsRolling(false);
     },
   });
@@ -106,6 +108,17 @@ export function DiceRoll({
     return playersList[currentPlayerIdx + 1];
   }, [game?.diceRolls]);
 
+  const lastDiceRoll = JSON.stringify(game?.diceRolls[0]);
+
+  const isMyTurn = useMemo(() => {
+    const myTurn =
+      game &&
+      game?.diceRolls[0] &&
+      session.data &&
+      game?.diceRolls[0].userId === session.data.user.id;
+    return !!myTurn;
+  }, [lastDiceRoll, game, session.data]);
+
   const handleRollDice = () => {
     mutate({ gameId: router.query.gid as string });
   };
@@ -163,8 +176,7 @@ export function DiceRoll({
         </div>
         <div className="flex justify-center">
           <button
-            className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900 active:bg-cyan-100"
-            onClick={handleRollDice}
+            className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900"
             disabled={true}
           >
             <FontAwesomeIcon
@@ -172,7 +184,7 @@ export function DiceRoll({
               spin
               className="h-6 w-6 pr-2 text-white"
             />
-            <span>Roll</span>
+            {/* <span>Roll</span> */}
           </button>
         </div>
       </>
@@ -246,7 +258,7 @@ export function DiceRoll({
             <button
               className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900 active:bg-cyan-100"
               onClick={handleRollDice}
-              // disabled={players.findIndex((player) => player.id === dice.userId)}
+              disabled={isRolling}
             >
               <FontAwesomeIcon
                 icon={faDice}
