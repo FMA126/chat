@@ -29,7 +29,7 @@ export const gameRouter = createTRPCRouter({
         include: {
           scoreCards: {
             include: {
-              user: true,
+              user: { select: { id: true, name: true } },
               scoreCardEntries: { orderBy: { id: "desc" } },
             },
           },
