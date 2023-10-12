@@ -62,7 +62,6 @@ enum PenaltyRow {
 }
 
 // Todo
-// all penalty boxes marked ends game
 // player whos turn it is can't pass
 // loading state to prevent multiple button presses (animations?)
 // leaderboard
@@ -268,7 +267,7 @@ export const ScoreCard = ({
       const rowName = ColorRow[color as keyof typeof ColorRow];
       const isMyTurn = game?.diceRolls[0]?.userId === session.data?.user.id;
       const duplicateMarkIdx = prev.findIndex((m) =>
-        color === "red" || color === "yelow"
+        color === "red" || color === "yellow"
           ? Object.keys(m)[0] === rowName && Object.values(m)[0] === boxIdx + 2
           : Object.keys(m)[0] === rowName && Object.values(m)[0] === 12 - boxIdx
       );
@@ -287,6 +286,7 @@ export const ScoreCard = ({
           return [...prev.slice(0, duplicateMarkIdx)];
         }
       }
+
       if (isMyTurn) {
         if (prev.length === 2) {
           return prev;
@@ -325,7 +325,6 @@ export const ScoreCard = ({
   };
 
   const updatePenalty = (penaltyIdx: number) => {
-    console.log(penaltyIdx);
     if (penaltyIdx > -1) {
       const mapPenalty =
         penaltyIdx === 0
@@ -399,6 +398,17 @@ export const ScoreCard = ({
       (card) => card.userId === session.data?.user.id
     )?.id;
     const diceRollId = game?.diceRolls[0]?.id;
+
+    const uniqueUserIdEntries = new Set<string>();
+    const check = game?.scoreCards
+      .map((sc) => sc.scoreCardEntries)
+      .flat()
+      ?.filter((scEntry) => scEntry.diceRollId === diceRollId);
+    check?.forEach(({ userId }) => {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      uniqueUserIdEntries.add(userId as string);
+    });
+
     const lock = lockRowColor();
     const mapLock =
       lock &&
@@ -411,15 +421,15 @@ export const ScoreCard = ({
         : lock === ColorRow.green
         ? { greenLock: 1 }
         : undefined);
-    scoreCardId &&
-      diceRollId &&
+
+    if (scoreCardId && diceRollId) {
       mutateScoreCardEntry({
         gameId: router.query.gid as string,
         scoreCardId,
         diceRollId,
-        isFinalEntry: finalMove,
         entry: mapLock ? [...marks, mapLock] : marks,
       });
+    }
   };
 
   if (!game || !game?.diceRolls[0]?.whiteOne)
@@ -706,20 +716,6 @@ const ScoreCardRow = ({
                   color === "green" || color === "blue"
                     ? box < firstEntryGreenBlue
                     : box > firstEntryRedYellow;
-                console.log(
-                  !(entries && !!entries[boxIdx]),
-                  dice &&
-                    dice.whiteOne + dice[color as keyof typeof DiceColor] ===
-                      box,
-                  isEditing,
-                  isMyCard,
-                  isMyTurn,
-                  entries,
-                  lock ? wasRowLockedOnCurrentDiceRoll : true,
-                  boxIdx === 10 ? currentMarkMakesFive : true,
-                  markableBox && markableBox(color, box, entries)
-                );
-
                 isMyCard &&
                   isEditing &&
                   updateCard &&

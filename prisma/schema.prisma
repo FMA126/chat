@@ -80,7 +80,6 @@ model Game {
   playerFour String?
   playerFive String?
   gameState String?
-  finalEntryCount Int @default(0)
   winner String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -99,6 +98,7 @@ model ScoreCard {
     blueLock Int?
     yellowLock Int?
     greenLock Int?
+    penaltyLock Int?
     redRowTotal Int @default(0)
     yellowRowTotal Int @default(0)
     blueRowTotal Int @default(0)

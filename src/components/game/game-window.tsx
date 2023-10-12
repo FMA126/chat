@@ -29,13 +29,16 @@ export const GameWindow = () => {
       card?.yellowLock,
       card?.blueLock,
       card?.greenLock,
-    ].filter((c) => !!c)?.length;
-    return lockList > 1;
+      card?.penaltyLock,
+    ];
+    const lockListLength = lockList.filter((c) => !!c)?.length;
+    return lockListLength > 1 || !!lockList[4];
   }, [
     game?.scoreCards[0]?.redLock,
     game?.scoreCards[0]?.yellowLock,
     game?.scoreCards[0]?.blueLock,
     game?.scoreCards[0]?.greenLock,
+    game?.scoreCards[0]?.penaltyLock,
   ]);
 
   if (!session || !game)

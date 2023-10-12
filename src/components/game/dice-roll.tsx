@@ -239,19 +239,22 @@ export function DiceRoll({
         </div>
       </div>
       <div className="flex items-center justify-center">
-        {nextPlayerTurn === session.data?.user.id && isTurnComplete && (
-          <button
-            className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900 active:bg-cyan-100"
-            onClick={handleRollDice}
-            // disabled={players.findIndex((player) => player.id === dice.userId)}
-          >
-            <FontAwesomeIcon
-              icon={faDice}
-              className="h-6 w-6 pr-2 text-white"
-            />
-            <span>Roll</span>
-          </button>
-        )}
+        {nextPlayerTurn &&
+          session.data?.user.id &&
+          nextPlayerTurn === session.data?.user.id &&
+          isTurnComplete && (
+            <button
+              className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900 active:bg-cyan-100"
+              onClick={handleRollDice}
+              // disabled={players.findIndex((player) => player.id === dice.userId)}
+            >
+              <FontAwesomeIcon
+                icon={faDice}
+                className="h-6 w-6 pr-2 text-white"
+              />
+              <span>Roll</span>
+            </button>
+          )}
       </div>
     </>
   );
