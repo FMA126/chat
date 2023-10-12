@@ -12,7 +12,7 @@ export function GameNav() {
       `${
         process.env.NODE_ENV === "development"
           ? "localhost:3000"
-          : "https://chat-fma126.vercel.app"
+          : "https://qwixxwithfriends.com"
       }` + router.asPath
     );
     toast.success("Game link copied!");
