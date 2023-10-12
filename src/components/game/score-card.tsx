@@ -63,8 +63,6 @@ enum PenaltyRow {
 }
 
 // Todo
-// player whos turn it is can't pass
-// loading state to prevent multiple button presses (animations?)
 // leaderboard
 
 // Nice to haves
@@ -270,6 +268,44 @@ export const ScoreCard = ({
     game?.diceRolls,
   ]);
 
+  const isMyTurn = useMemo(() => {
+    const myTurn =
+      game &&
+      game?.diceRolls[0] &&
+      session.data &&
+      game?.diceRolls[0].userId === session.data.user.id;
+    return !!myTurn;
+  }, [JSON.stringify(game?.diceRolls[0]), game, session.data]);
+
+  const markableBox = (color: string, box: number, entries: number[]) => {
+    const firstEntryGreenBlue =
+      entries.findLastIndex((e) => !!e) >= 0
+        ? 12 - entries.findLastIndex((e) => !!e)
+        : 13;
+    const firstEntryRedYellow =
+      entries.findLastIndex((e) => !!e) >= 0
+        ? entries.findLastIndex((e) => !!e) + 2
+        : 1;
+
+    const availableBox =
+      color === "green" || color === "blue"
+        ? box < firstEntryGreenBlue
+        : box > firstEntryRedYellow;
+
+    return availableBox;
+  };
+
+  const lockRowColor = () => {
+    const lock = marks.find(
+      (m) =>
+        (Object.keys(m)[0] === ColorRow.red && Object.values(m)[0] === 12) ||
+        (Object.keys(m)[0] === ColorRow.yellow && Object.values(m)[0] === 12) ||
+        (Object.keys(m)[0] === ColorRow.blue && Object.values(m)[0] === 2) ||
+        (Object.keys(m)[0] === ColorRow.green && Object.values(m)[0] === 2)
+    );
+    return lock && (Object.keys(lock)[0] as keyof Mark);
+  };
+
   const updateCard = ({ color, boxIdx }: { color: string; boxIdx: number }) => {
     setMarks((prev) => {
       const rowName = ColorRow[color as keyof typeof ColorRow];
@@ -363,44 +399,6 @@ export const ScoreCard = ({
     }
   };
 
-  const isMyTurn = useMemo(() => {
-    const myTurn =
-      game &&
-      game?.diceRolls[0] &&
-      session.data &&
-      game?.diceRolls[0].userId === session.data.user.id;
-    return !!myTurn;
-  }, [JSON.stringify(game?.diceRolls[0]), game, session.data]);
-
-  const markableBox = (color: string, box: number, entries: number[]) => {
-    const firstEntryGreenBlue =
-      entries.findLastIndex((e) => !!e) >= 0
-        ? 12 - entries.findLastIndex((e) => !!e)
-        : 13;
-    const firstEntryRedYellow =
-      entries.findLastIndex((e) => !!e) >= 0
-        ? entries.findLastIndex((e) => !!e) + 2
-        : 1;
-
-    const availableBox =
-      color === "green" || color === "blue"
-        ? box < firstEntryGreenBlue
-        : box > firstEntryRedYellow;
-
-    return availableBox;
-  };
-
-  const lockRowColor = () => {
-    const lock = marks.find(
-      (m) =>
-        (Object.keys(m)[0] === ColorRow.red && Object.values(m)[0] === 12) ||
-        (Object.keys(m)[0] === ColorRow.yellow && Object.values(m)[0] === 12) ||
-        (Object.keys(m)[0] === ColorRow.blue && Object.values(m)[0] === 2) ||
-        (Object.keys(m)[0] === ColorRow.green && Object.values(m)[0] === 2)
-    );
-    return lock && (Object.keys(lock)[0] as keyof Mark);
-  };
-
   const submitEntry = () => {
     const scoreCardId = game?.scoreCards.find(
       (card) => card.userId === session.data?.user.id
@@ -430,7 +428,16 @@ export const ScoreCard = ({
         ? { greenLock: 1 }
         : undefined);
 
-    if (scoreCardId && diceRollId) {
+    if (isMyTurn && marks.length === 0) {
+      updatePenalty(
+        [
+          entries.penaltyOne,
+          entries.penaltyTwo,
+          entries.penaltyThree,
+          entries.penaltyFour,
+        ]?.findIndex((e) => e === 0) ?? 0
+      );
+    } else if (scoreCardId && diceRollId) {
       mutateScoreCardEntry({
         gameId: router.query.gid as string,
         scoreCardId,
@@ -486,14 +493,16 @@ export const ScoreCard = ({
                 session?.data?.user?.id === playerId
                   ? "rounded-xl bg-purple-300 text-xl text-purple-900"
                   : "text-blue-900",
-                "flex items-center gap-2 p-2"
+                "flex items-center gap-2 truncate text-ellipsis p-2"
               )}
             >
-              <UserIcon className="h-6 w-6" />
+              <div className="h-6 w-6">
+                <UserIcon className="h-6 w-6" />
+              </div>
               <span>{playerName ?? "no name"}</span>
             </div>
             {isMyCard && isEditing && (
-              <div className="flex grow items-center justify-center gap-2 md:gap-4">
+              <div className="flex grow items-center justify-end gap-2 text-xs sm:text-base md:gap-4">
                 {!isFetching ? (
                   <>
                     <button
@@ -503,13 +512,18 @@ export const ScoreCard = ({
                       className="flex gap-1 rounded-xl border border-green-900 bg-green-200/80 p-2 text-green-900"
                       disabled={isSubmitting}
                     >
-                      <CheckBadgeIcon className="h-6 w-6 " />
                       {isSubmitting ? (
                         <Spinner height="6" width="6" color="green-900" />
                       ) : marks.length === 0 ? (
-                        <span>Pass</span>
+                        <>
+                          <CheckBadgeIcon className="h-4 w-4 sm:h-6 sm:w-6" />
+                          <span>Pass</span>
+                        </>
                       ) : (
-                        <span>Save</span>
+                        <>
+                          <CheckBadgeIcon className="h-4 w-4 sm:h-6 sm:w-6" />
+                          <span>Save</span>
+                        </>
                       )}
                     </button>
                     <button
@@ -519,11 +533,13 @@ export const ScoreCard = ({
                       className="flex gap-1 rounded-xl border border-red-900 bg-red-200/80 p-2 text-red-900"
                       disabled={isSubmitting}
                     >
-                      <XMarkIcon className="h-6 w-6 " />
                       {isSubmitting ? (
                         <Spinner height="6" width="6" color="red-900" />
                       ) : (
-                        <span>Clear</span>
+                        <>
+                          <XMarkIcon className="h-4 w-4 sm:h-6 sm:w-6" />
+                          <span>Clear</span>
+                        </>
                       )}
                     </button>
                   </>
@@ -532,7 +548,7 @@ export const ScoreCard = ({
                 )}
               </div>
             )}
-            <div className="w-1/6 rounded-t-lg border-l-2 border-r-2 border-t-2 border-black">
+            <div className="w-1/6 rounded-t-lg border-l-2 border-r-2 border-t-2 border-black text-xs md:text-sm">
               At least 5 X&apos;s
             </div>
           </div>

@@ -8,10 +8,7 @@ export function ScoreCardViewSelect({
   setCardView: Dispatch<SetStateAction<string>>;
 }) {
   return (
-    <div className="flex justify-center gap-1">
-      <div></div>
-      <div></div>
-      <div></div>
+    <div className="flex justify-center gap-1 text-xs sm:text-base">
       <div>
         <button
           className="flex items-center gap-2 rounded-lg border-2 border-solid bg-cyan-800 px-4 py-2 text-white active:bg-cyan-500"

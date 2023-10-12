@@ -92,7 +92,7 @@ export const GameWindow = () => {
         <div className="">
           <ScoreCardViewSelect setCardView={setCardView} />
         </div>
-        <div className="grow p-2">
+        <div className="grow py-2 sm:px-2">
           {cardView === "myCard" ? (
             <ScoreCard
               playerName={session?.data?.user?.name ?? "no name"}

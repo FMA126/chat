@@ -129,12 +129,12 @@ export function DiceRoll({
     return (
       <>
         <div className="flex justify-center">
-          <div className="flex max-w-2xl gap-2">
+          <div className="flex max-w-2xl sm:gap-2">
             <div className="">
               <FontAwesomeIcon
                 icon={faDice}
                 spin
-                className="-black h-14 w-14 text-white"
+                className="h-14 w-14 text-white"
               />
             </div>
             <div className="">
@@ -197,14 +197,21 @@ export function DiceRoll({
           {players.find((player) => player?.userId === game?.playerOne)?.name}{" "}
           roll to start game
         </h2>
-        <button
-          className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900"
-          onClick={handleRollDice}
-          disabled={session?.data?.user?.id !== game?.playerOne}
-        >
-          <FontAwesomeIcon icon={faDice} className="h-6 w-6 pr-2 text-white" />
-          <span>Roll</span>
-        </button>
+        {!game?.playerTwo ? (
+          <div>Waiting for other players</div>
+        ) : (
+          <button
+            className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900"
+            onClick={handleRollDice}
+            disabled={session?.data?.user?.id !== game?.playerOne}
+          >
+            <FontAwesomeIcon
+              icon={faDice}
+              className="h-6 w-6 pr-2 text-white"
+            />
+            <span>Roll</span>
+          </button>
+        )}
       </div>
     );
 
@@ -215,37 +222,37 @@ export function DiceRoll({
           <div className="">
             <FontAwesomeIcon
               icon={diceNumber(game?.diceRolls[0]?.whiteOne) ?? faDice}
-              className="h-14 w-14 bg-black text-white"
+              className="h-12 w-12 bg-black text-white sm:h-14 sm:w-14"
             />
           </div>
           <div className="">
             <FontAwesomeIcon
               icon={diceNumber(game?.diceRolls[0]?.whiteTwo) ?? faDice}
-              className="h-14 w-14 bg-black text-white"
+              className="h-12 w-12 bg-black text-white sm:h-14 sm:w-14"
             />
           </div>
           <div className="">
             <FontAwesomeIcon
               icon={diceNumber(game?.diceRolls[0]?.red) ?? faDice}
-              className="h-14 w-14 bg-white text-[#e00000]"
+              className="h-12 w-12 bg-white text-[#e00000] sm:h-14 sm:w-14"
             />
           </div>
           <div className="">
             <FontAwesomeIcon
               icon={diceNumber(game?.diceRolls[0]?.yellow) ?? faDice}
-              className="h-14 w-14 bg-white text-[#fdc800]"
+              className="h-12 w-12 bg-white text-[#fdc800] sm:h-14 sm:w-14"
             />
           </div>
           <div className="">
             <FontAwesomeIcon
               icon={diceNumber(game?.diceRolls[0]?.green) ?? faDice}
-              className="h-14 w-14 bg-white text-[#319800]"
+              className="h-12 w-12 bg-white text-[#319800] sm:h-14 sm:w-14"
             />
           </div>
           <div className="">
             <FontAwesomeIcon
               icon={diceNumber(game?.diceRolls[0]?.blue) ?? faDice}
-              className="h-14 w-14 bg-white text-[#326698]"
+              className="h-12 w-12 bg-white text-[#326698] sm:h-14 sm:w-14"
             />
           </div>
         </div>
