@@ -209,30 +209,33 @@ export const gameRouter = createTRPCRouter({
         });
       } else {
         await ctx.prisma.scoreCardEntry.createMany({ data: [...batchEntry] });
-        const mapLock = batchEntry.find(
-          (e) =>
-            e.redLock === 1 ||
-            e.yellowLock === 1 ||
-            e.blueLock === 1 ||
-            e.greenLock === 1 ||
-            e.penaltyFour === 1
-        );
-        if (mapLock) {
-          await ctx.prisma.scoreCard.updateMany({
-            where: { gameId: +gameId },
-            data: mapLock.redLock
-              ? { redLock: 1 }
-              : mapLock.yellowLock
-              ? { yellowLock: 1 }
-              : mapLock.blueLock
-              ? { blueLock: 1 }
-              : mapLock.greenLock
-              ? { greenLock: 1 }
-              : mapLock.penaltyFour
-              ? { penaltyLock: 1 }
-              : {},
-          });
-        }
+      }
+      const lockMap = new Map();
+      const locks = entry
+        ?.filter(
+          (be) =>
+            be.redLock === 1 ||
+            be.yellowLock === 1 ||
+            be.blueLock === 1 ||
+            be.greenLock === 1 ||
+            be.penaltyFour === 1
+        )
+        .forEach((lock) => {
+          if (Object.keys(lock)[0] === "penaltyFour") {
+            lockMap.set("penaltyLock", 1);
+          } else {
+            lockMap.set(Object.keys(lock)[0], Object.values(lock)[0]);
+          }
+        });
+
+      if (lockMap.size > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const dataMap = Object.fromEntries(lockMap.entries());
+        await ctx.prisma.scoreCard.updateMany({
+          where: { gameId: +gameId },
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          data: dataMap,
+        });
       }
       // is the game over?
       // the game is over if all players have marked for this diceroll and there are two locks or the fourth penalty box has been checked
@@ -271,7 +274,7 @@ export const gameRouter = createTRPCRouter({
 
       const haveAllPlayersMoved =
         playerIdsCompletedTurn.size === playerList.length;
-      const areTwoRowsLockedOut = numberColorsLocked === 2;
+      const areTwoRowsLockedOut = numberColorsLocked >= 2;
       const isGameOver =
         haveAllPlayersMoved && (areTwoRowsLockedOut || isPenaltyLocked);
 

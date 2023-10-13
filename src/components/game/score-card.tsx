@@ -296,14 +296,14 @@ export const ScoreCard = ({
   };
 
   const lockRowColor = () => {
-    const lock = marks.find(
+    const locks = marks.filter(
       (m) =>
         (Object.keys(m)[0] === ColorRow.red && Object.values(m)[0] === 12) ||
         (Object.keys(m)[0] === ColorRow.yellow && Object.values(m)[0] === 12) ||
         (Object.keys(m)[0] === ColorRow.blue && Object.values(m)[0] === 2) ||
         (Object.keys(m)[0] === ColorRow.green && Object.values(m)[0] === 2)
     );
-    return lock && (Object.keys(lock)[0] as keyof Mark);
+    return marks.length > 0 ? locks.map((lock) => Object.keys(lock)[0]) : [];
   };
 
   const updateCard = ({ color, boxIdx }: { color: string; boxIdx: number }) => {
@@ -405,20 +405,9 @@ export const ScoreCard = ({
     )?.id;
     const diceRollId = game?.diceRolls[0]?.id;
 
-    const uniqueUserIdEntries = new Set<string>();
-    const check = game?.scoreCards
-      .map((sc) => sc.scoreCardEntries)
-      .flat()
-      ?.filter((scEntry) => scEntry.diceRollId === diceRollId);
-    check?.forEach(({ userId }) => {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      uniqueUserIdEntries.add(userId as string);
-    });
-
-    const lock = lockRowColor();
-    const mapLock =
-      lock &&
-      (lock === ColorRow.red
+    const locks = lockRowColor();
+    const mapLocks = locks.map((lock) =>
+      lock === ColorRow.red
         ? { redLock: 1 }
         : lock === ColorRow.yellow
         ? { yellowLock: 1 }
@@ -426,7 +415,14 @@ export const ScoreCard = ({
         ? { blueLock: 1 }
         : lock === ColorRow.green
         ? { greenLock: 1 }
-        : undefined);
+        : {}
+    );
+    console.log(
+      "locks",
+      locks,
+      "mapLocks.length > 0 ? [...marks, ...mapLocks] : marks,",
+      mapLocks.length > 0 ? [...marks, ...mapLocks] : marks
+    );
 
     if (isMyTurn && marks.length === 0) {
       updatePenalty(
@@ -442,7 +438,7 @@ export const ScoreCard = ({
         gameId: router.query.gid as string,
         scoreCardId,
         diceRollId,
-        entry: mapLock ? [...marks, mapLock] : marks,
+        entry: mapLocks.length > 0 ? [...marks, ...mapLocks] : marks,
       });
     }
   };
