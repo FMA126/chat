@@ -417,12 +417,6 @@ export const ScoreCard = ({
         ? { greenLock: 1 }
         : {}
     );
-    console.log(
-      "locks",
-      locks,
-      "mapLocks.length > 0 ? [...marks, ...mapLocks] : marks,",
-      mapLocks.length > 0 ? [...marks, ...mapLocks] : marks
-    );
 
     if (isMyTurn && marks.length === 0) {
       updatePenalty(
