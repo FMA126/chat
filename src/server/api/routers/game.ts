@@ -286,10 +286,6 @@ export const gameRouter = createTRPCRouter({
           gameId: number;
           scoreCardId: number;
         }) => {
-          const game = await ctx.prisma.game.findFirst({
-            where: { id: +gameId },
-          });
-
           const redRows = await ctx.prisma.scoreCardEntry.findMany({
             where: {
               scoreCardId,
@@ -340,58 +336,6 @@ export const gameRouter = createTRPCRouter({
                 (scoreList[blueRows.length] ?? 0) +
                 (scoreList[greenRows.length] ?? 0) -
                 (penalties.length * 5 ?? 0),
-            },
-          });
-
-          const numberOfPlayers = [
-            game?.playerOne,
-            game?.playerTwo,
-            game?.playerThree,
-            game?.playerFour,
-            game?.playerFive,
-          ].filter((p) => !!p)?.length;
-
-          const lastScoreCard = await ctx.prisma.scoreCard.findFirst({
-            where: { id: scoreCardId },
-          });
-          const lastRedRows = await ctx.prisma.scoreCardEntry.findMany({
-            where: { scoreCardId: lastScoreCard?.id, redRow: { not: null } },
-          });
-          const lastYellowRows = await ctx.prisma.scoreCardEntry.findMany({
-            where: { scoreCardId: lastScoreCard?.id, yellowRow: { not: null } },
-          });
-          const lastBlueRows = await ctx.prisma.scoreCardEntry.findMany({
-            where: { scoreCardId: lastScoreCard?.id, blueRow: { not: null } },
-          });
-          const lastGreenRows = await ctx.prisma.scoreCardEntry.findMany({
-            where: { scoreCardId: lastScoreCard?.id, greenRow: { not: null } },
-          });
-          const lastPenalties = await ctx.prisma.scoreCardEntry.findMany({
-            where: {
-              scoreCardId: lastScoreCard?.id,
-              OR: [
-                { penaltyOne: { not: null } },
-                { penaltyTwo: { not: null } },
-                { penaltyThree: { not: null } },
-                { penaltyFour: { not: null } },
-              ],
-            },
-          });
-
-          await ctx.prisma.scoreCard.update({
-            where: { id: lastScoreCard?.id },
-            data: {
-              redRowTotal: scoreList[lastRedRows.length],
-              yellowRowTotal: scoreList[lastYellowRows.length],
-              blueRowTotal: scoreList[lastBlueRows.length],
-              greenRowTotal: scoreList[lastGreenRows.length],
-              penaltyTotal: lastPenalties.length * 5,
-              total:
-                (scoreList[lastRedRows.length] ?? 0) +
-                (scoreList[lastYellowRows.length] ?? 0) +
-                (scoreList[lastBlueRows.length] ?? 0) +
-                (scoreList[lastGreenRows.length] ?? 0) -
-                (lastPenalties.length * 5 ?? 0),
             },
           });
 
