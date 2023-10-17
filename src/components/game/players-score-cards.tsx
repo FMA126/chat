@@ -3,7 +3,7 @@ import { api } from "~/utils/api";
 import { ScoreCard } from "./score-card";
 import { useSession } from "next-auth/react";
 
-export function PlayersScoreCards({ finalMove }: { finalMove: boolean }) {
+export function PlayersScoreCards() {
   const router = useRouter();
   const session = useSession();
   const { data, error } = api.game.byId.useQuery(
@@ -25,7 +25,6 @@ export function PlayersScoreCards({ finalMove }: { finalMove: boolean }) {
             playerName={scoreCard.user.name ?? "no name"}
             playerId={scoreCard.user.id}
             isMyCard={scoreCard.user.id === session.data?.user.id}
-            finalMove={finalMove}
           />
         </div>
       ))}

@@ -98,11 +98,10 @@ export const GameWindow = () => {
               playerName={session?.data?.user?.name ?? "no name"}
               playerId={session?.data?.user?.id ?? "-1"}
               isMyCard={true}
-              finalMove={finalMove}
             />
           ) : (
             <div className="max-h-[60vh] overflow-auto">
-              <PlayersScoreCards finalMove={finalMove} />
+              <PlayersScoreCards />
             </div>
           )}
         </div>

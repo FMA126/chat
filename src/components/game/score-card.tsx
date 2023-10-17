@@ -7,14 +7,7 @@ import {
   UserIcon,
   XMarkIcon,
 } from "@heroicons/react/24/solid";
-import {
-  type Dispatch,
-  type SetStateAction,
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-} from "react";
+import { type Dispatch, type SetStateAction, useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
@@ -63,6 +56,7 @@ enum PenaltyRow {
 }
 
 // Todo
+// Player only able to select one color and one white on own roll
 // leaderboard
 
 // Nice to haves
@@ -74,12 +68,10 @@ export const ScoreCard = ({
   playerName,
   playerId,
   isMyCard,
-  finalMove,
 }: {
   playerName: string;
   playerId: string;
   isMyCard: boolean;
-  finalMove: boolean;
 }) => {
   const session = useSession();
   const router = useRouter();
