@@ -270,6 +270,7 @@ export const ScoreCard = ({
   }, [JSON.stringify(game?.diceRolls[0]), game, session.data]);
 
   const markableBox = (color: string, box: number, entries: number[]) => {
+    const dice = game?.diceRolls[0];
     const firstEntryGreenBlue =
       entries.findLastIndex((e) => !!e) >= 0
         ? 12 - entries.findLastIndex((e) => !!e)
@@ -278,6 +279,11 @@ export const ScoreCard = ({
       entries.findLastIndex((e) => !!e) >= 0
         ? entries.findLastIndex((e) => !!e) + 2
         : 1;
+    const coloredOne =
+      dice && dice?.whiteOne + dice[color as keyof typeof DiceColor];
+    const coloredTwo =
+      dice && dice?.whiteTwo + dice[color as keyof typeof DiceColor];
+    const whiteNumber = dice && dice?.whiteOne + dice?.whiteTwo;
 
     const availableBox =
       color === "green" || color === "blue"
