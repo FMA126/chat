@@ -7,7 +7,13 @@ import {
   UserIcon,
   XMarkIcon,
 } from "@heroicons/react/24/solid";
-import { type Dispatch, type SetStateAction, useState, useMemo } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useState,
+  useMemo,
+  Fragment,
+} from "react";
 import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
@@ -791,7 +797,7 @@ const ScoreCardRow = ({
 
   const showHighlight = ({ box, boxIdx }: { box: number; boxIdx: number }) => {
     // both white dice
-    return (
+    return !!(
       !(entries && !!entries[boxIdx]) &&
       dice &&
       (dice?.whiteOne + dice?.whiteTwo === box ||
@@ -848,7 +854,7 @@ const ScoreCardRow = ({
                 <XMarkIcon className="h-6 w-6 self-center md:h-8 md:h-8" />
               ) : (
                 <>
-                  {dice && updateCard && setWhiteChoice && setColorChoice && (
+                  {dice && updateCard && setWhiteChoice && setColorChoice ? (
                     <DicePopOver
                       dice={dice}
                       box={box}
@@ -861,6 +867,15 @@ const ScoreCardRow = ({
                       setWhiteChoice={setWhiteChoice}
                       setColorChoice={setColorChoice}
                     />
+                  ) : (
+                    <div
+                      className={joinClassNames(
+                        innerBoxColor(color),
+                        "flex items-center justify-center rounded-lg md:text-lg lg:text-2xl"
+                      )}
+                    >
+                      <p>{box}</p>
+                    </div>
                   )}
                 </>
               )}
@@ -1089,13 +1104,7 @@ const DicePopOver = ({
   color: string;
   box: number;
   boxIdx: number;
-  isBoxHighlighted: ({
-    box,
-    boxIdx,
-  }: {
-    box: number;
-    boxIdx: number;
-  }) => boolean;
+  isBoxHighlighted: boolean;
   shouldUpdateCard: ({
     box,
     boxIdx,
@@ -1135,16 +1144,22 @@ const DicePopOver = ({
     }
   };
 
-  const handleDiceSelect = (color: string) => {
-    if (color === "white") {
+  const handleDiceSelect = ({
+    diceColor,
+    rowColor,
+  }: {
+    diceColor: string;
+    rowColor: string;
+  }) => {
+    if (diceColor === "white") {
       if (shouldUpdateCard({ box, boxIdx })) {
         setWhiteChoice((prev) => !prev);
-        updateCard({ color, boxIdx });
+        updateCard({ color: rowColor, boxIdx });
       }
     } else {
       if (shouldUpdateCard({ box, boxIdx })) {
         setColorChoice((prev) => !prev);
-        updateCard({ color, boxIdx });
+        updateCard({ color: rowColor, boxIdx });
       }
     }
   };
@@ -1162,12 +1177,14 @@ const DicePopOver = ({
           )
             ? "border-slate-900 bg-cyan-300 text-white"
             : "",
+          isBoxHighlighted ? "animate-pulse" : "",
           "flex h-full w-full items-center justify-center rounded-lg md:text-lg lg:text-2xl"
         )}
       >
         {box}
       </Menu.Button>
       <Transition
+        as={Fragment}
         enter="transition duration-100 ease-out"
         enterFrom="transform scale-95 opacity-0"
         enterTo="transform scale-100 opacity-100"
@@ -1175,7 +1192,7 @@ const DicePopOver = ({
         leaveFrom="transform scale-100 opacity-100"
         leaveTo="transform scale-95 opacity-0"
       >
-        <Menu.Items className="absolute mt-2 min-w-full origin-top divide-y divide-gray-400 rounded-md bg-gray-400 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <Menu.Items className="absolute z-50 mt-2 origin-top divide-y divide-gray-400 rounded-md bg-gray-400 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           {choiceList
             .filter((choice) => box === choice.diceOne + choice.diceTwo)
             .map((choice, choiceIdx) => (
@@ -1184,7 +1201,10 @@ const DicePopOver = ({
                   <div
                     className="flex justify-center gap-1 p-2 py-1 active:border-slate-900 active:bg-cyan-300"
                     onClick={() => {
-                      handleDiceSelect(choice.color);
+                      handleDiceSelect({
+                        diceColor: choice.color,
+                        rowColor: color,
+                      });
                       close();
                     }}
                   >
