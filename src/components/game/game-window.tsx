@@ -10,6 +10,8 @@ import { useRouter } from "next/router";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import { joinClassNames } from "~/utils/joinClassNames";
 import { GameLayout } from "../layout/game-layout";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDice } from "@fortawesome/free-solid-svg-icons";
 
 export const GameWindow = () => {
   const [cardView, setCardView] = useState("myCard");
@@ -21,25 +23,6 @@ export const GameWindow = () => {
     },
     { enabled: !!router.query.gid }
   );
-
-  const finalMove = useMemo(() => {
-    const card = game?.scoreCards?.[0];
-    const lockList = [
-      card?.redLock,
-      card?.yellowLock,
-      card?.blueLock,
-      card?.greenLock,
-      card?.penaltyLock,
-    ];
-    const lockListLength = lockList.filter((c) => !!c)?.length;
-    return lockListLength > 1 || !!lockList[4];
-  }, [
-    game?.scoreCards[0]?.redLock,
-    game?.scoreCards[0]?.yellowLock,
-    game?.scoreCards[0]?.blueLock,
-    game?.scoreCards[0]?.greenLock,
-    game?.scoreCards[0]?.penaltyLock,
-  ]);
 
   if (!session || !game)
     return (
@@ -66,7 +49,11 @@ export const GameWindow = () => {
                 "flex items-center rounded-lg p-1"
               )}
             >
-              <UserCircleIcon className="h-4 w-4" />
+              {game?.diceRolls[0]?.userId === card.user.id ? (
+                <FontAwesomeIcon icon={faDice} />
+              ) : (
+                <UserCircleIcon className="h-4 w-4" />
+              )}
               <div className="pl-1 pr-2 text-xs md:text-xl">
                 {card.user.name}
               </div>

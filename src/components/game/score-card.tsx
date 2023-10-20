@@ -56,6 +56,12 @@ interface Mark {
   penaltyTwo?: number;
   penaltyThree?: number;
   penaltyFour?: number;
+  dice?: string;
+}
+
+enum DiceSelect {
+  white = "white",
+  colored = "colored",
 }
 
 enum ColorRow {
@@ -94,8 +100,6 @@ export const ScoreCard = ({
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [marks, setMarks] = useState<Mark[]>([]);
-  const [whiteChoice, setWhiteChoice] = useState(false);
-  const [colorChoice, setColorChoice] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     data: game,
@@ -289,7 +293,6 @@ export const ScoreCard = ({
   }, [JSON.stringify(game?.diceRolls[0]), game, session.data]);
 
   const markableBox = (color: string, box: number, entries: number[]) => {
-    const dice = game?.diceRolls[0];
     const firstEntryGreenBlue =
       entries.findLastIndex((e) => !!e) >= 0
         ? 12 - entries.findLastIndex((e) => !!e)
@@ -298,12 +301,6 @@ export const ScoreCard = ({
       entries.findLastIndex((e) => !!e) >= 0
         ? entries.findLastIndex((e) => !!e) + 2
         : 1;
-    const coloredOne =
-      dice && dice?.whiteOne + dice[color as keyof typeof DiceColor];
-    const coloredTwo =
-      dice && dice?.whiteTwo + dice[color as keyof typeof DiceColor];
-    const whiteNumber = dice && dice?.whiteOne + dice?.whiteTwo;
-
     const availableBox =
       color === "green" || color === "blue"
         ? box < firstEntryGreenBlue
@@ -323,7 +320,15 @@ export const ScoreCard = ({
     return marks.length > 0 ? locks.map((lock) => Object.keys(lock)[0]) : [];
   };
 
-  const updateCard = ({ color, boxIdx }: { color: string; boxIdx: number }) => {
+  const updateCard = ({
+    color,
+    boxIdx,
+    dice,
+  }: {
+    color: string;
+    boxIdx: number;
+    dice: string;
+  }) => {
     setMarks((prev) => {
       const rowName = ColorRow[color as keyof typeof ColorRow];
       const isMyTurn = game?.diceRolls[0]?.userId === session.data?.user.id;
@@ -331,6 +336,9 @@ export const ScoreCard = ({
         color === "red" || color === "yellow"
           ? Object.keys(m)[0] === rowName && Object.values(m)[0] === boxIdx + 2
           : Object.keys(m)[0] === rowName && Object.values(m)[0] === 12 - boxIdx
+      );
+      const diceColorMatchIdx = prev.findIndex(
+        (m) => m.dice === DiceSelect[dice as keyof typeof DiceSelect]
       );
       const penaltyIdx = prev.findIndex(
         (m) =>
@@ -348,6 +356,21 @@ export const ScoreCard = ({
         }
       }
 
+      if (diceColorMatchIdx > -1) {
+        if (diceColorMatchIdx === 0) {
+          const newMark = {} as Mark;
+          newMark[rowName] =
+            color === "red" || color === "yellow" ? boxIdx + 2 : 12 - boxIdx;
+          return [{ ...newMark, dice }, ...prev.slice(1)];
+        }
+        if (diceColorMatchIdx === 1) {
+          const newMark = {} as Mark;
+          newMark[rowName] =
+            color === "red" || color === "yellow" ? boxIdx + 2 : 12 - boxIdx;
+          return [{ ...newMark, dice }, ...prev.slice(0, diceColorMatchIdx)];
+        }
+      }
+
       if (isMyTurn) {
         if (prev.length === 2) {
           return prev;
@@ -356,7 +379,7 @@ export const ScoreCard = ({
           const newMark = {} as Mark;
           newMark[rowName] =
             color === "red" || color === "yellow" ? boxIdx + 2 : 12 - boxIdx;
-          return [{ ...newMark }] as Mark[];
+          return [{ ...newMark, dice }] as Mark[];
         }
         if (penaltyIdx > -1) {
           return [
@@ -365,6 +388,7 @@ export const ScoreCard = ({
                 color === "red" || color === "yellow"
                   ? boxIdx + 2
                   : 12 - boxIdx,
+              dice,
             },
           ] as Mark[];
         }
@@ -373,6 +397,7 @@ export const ScoreCard = ({
           {
             [rowName]:
               color === "red" || color === "yellow" ? boxIdx + 2 : 12 - boxIdx,
+            dice,
           },
         ] as Mark[];
       }
@@ -380,6 +405,7 @@ export const ScoreCard = ({
         {
           [rowName]:
             color === "red" || color === "yellow" ? boxIdx + 2 : 12 - boxIdx,
+          dice,
         },
       ];
     });
@@ -577,8 +603,6 @@ export const ScoreCard = ({
               green: game?.diceRolls[0]?.green,
             }}
             updateCard={updateCard}
-            setWhiteChoice={setWhiteChoice}
-            setColorChoice={setColorChoice}
             marks={marks.filter(({ redRow }) => !!redRow)}
             color="red"
             markableBox={markableBox}
@@ -601,8 +625,6 @@ export const ScoreCard = ({
               green: game?.diceRolls[0]?.green,
             }}
             updateCard={updateCard}
-            setWhiteChoice={setWhiteChoice}
-            setColorChoice={setColorChoice}
             marks={marks.filter(({ yellowRow }) => !!yellowRow)}
             color="yellow"
             markableBox={markableBox}
@@ -625,8 +647,6 @@ export const ScoreCard = ({
               green: game?.diceRolls[0]?.green,
             }}
             updateCard={updateCard}
-            setWhiteChoice={setWhiteChoice}
-            setColorChoice={setColorChoice}
             marks={marks.filter(({ greenRow }) => !!greenRow)}
             color="green"
             markableBox={markableBox}
@@ -649,8 +669,6 @@ export const ScoreCard = ({
               green: game?.diceRolls[0]?.green,
             }}
             updateCard={updateCard}
-            setWhiteChoice={setWhiteChoice}
-            setColorChoice={setColorChoice}
             marks={marks.filter(({ blueRow }) => !!blueRow)}
             color="blue"
             markableBox={markableBox}
@@ -712,8 +730,6 @@ const ScoreCardRow = ({
   isEditing,
   setIsEditing,
   playerId,
-  setWhiteChoice,
-  setColorChoice,
   updateCard,
   marks,
   markableBox,
@@ -729,9 +745,15 @@ const ScoreCardRow = ({
   isEditing?: boolean;
   setIsEditing?: Dispatch<SetStateAction<boolean>>;
   marks?: Mark[];
-  updateCard?: ({ color, boxIdx }: { color: string; boxIdx: number }) => void;
-  setWhiteChoice?: Dispatch<SetStateAction<boolean>>;
-  setColorChoice?: Dispatch<SetStateAction<boolean>>;
+  updateCard?: ({
+    color,
+    boxIdx,
+    dice,
+  }: {
+    color: string;
+    boxIdx: number;
+    dice: string;
+  }) => void;
   markableBox?: (color: string, box: number, entries: number[]) => boolean;
 }) => {
   const [row, setRow] = useState(() =>
@@ -796,13 +818,13 @@ const ScoreCardRow = ({
   };
 
   const showHighlight = ({ box, boxIdx }: { box: number; boxIdx: number }) => {
-    // both white dice
     return !!(
       !(entries && !!entries[boxIdx]) &&
       dice &&
       (dice?.whiteOne + dice?.whiteTwo === box ||
-        dice.whiteOne + dice[color as keyof typeof DiceColor] === box ||
-        dice.whiteTwo + dice[color as keyof typeof DiceColor] === box) &&
+        (isMyTurn &&
+          (dice.whiteOne + dice[color as keyof typeof DiceColor] === box ||
+            dice.whiteTwo + dice[color as keyof typeof DiceColor] === box))) &&
       isEditing &&
       isMyCard &&
       entries &&
@@ -811,32 +833,6 @@ const ScoreCardRow = ({
       (boxIdx === 10 ? currentMarkMakesFive : true) &&
       markableBox(color, box, entries)
     );
-    // whiteOne and color
-    // !(entries && !!entries[boxIdx]) &&
-    //   dice &&
-    //   dice.whiteOne + dice[color as keyof typeof DiceColor] === box &&
-    //   isEditing &&
-    //   isMyCard &&
-    //   isMyTurn &&
-    //   entries &&
-    //   markableBox &&
-    //   (lock ? wasRowLockedOnCurrentDiceRoll : true) &&
-    //   (boxIdx === 10 ? currentMarkMakesFive : true) &&
-    //   markableBox(color, box, entries);
-    // // whiteTwo and color
-    // !(entries && !!entries[boxIdx]) &&
-    //   dice &&
-    //   dice.whiteTwo + dice[color as keyof typeof DiceColor] === box &&
-    //   isEditing &&
-    //   isMyCard &&
-    //   isMyTurn &&
-    //   entries &&
-    //   markableBox &&
-    //   (lock ? wasRowLockedOnCurrentDiceRoll : true) &&
-    //   (boxIdx === 10 ? currentMarkMakesFive : true) &&
-    //   markableBox(color, box, entries);
-    // ? "animate-pulse"
-    // : "",
   };
 
   return (
@@ -851,10 +847,19 @@ const ScoreCardRow = ({
               key={boxIdx}
             >
               {entries && !!entries[boxIdx] ? (
-                <XMarkIcon className="h-6 w-6 self-center md:h-8 md:h-8" />
+                <>
+                  <div
+                    className={joinClassNames(
+                      innerBoxColor(color),
+                      "flex h-full w-full items-center justify-center rounded-lg md:text-lg lg:text-2xl"
+                    )}
+                  >
+                    <XMarkIcon className="h-6 w-6 self-center md:h-8 md:h-8" />
+                  </div>
+                </>
               ) : (
                 <>
-                  {dice && updateCard && setWhiteChoice && setColorChoice ? (
+                  {dice && updateCard ? (
                     <DicePopOver
                       dice={dice}
                       box={box}
@@ -864,8 +869,6 @@ const ScoreCardRow = ({
                       isBoxHighlighted={isBoxHighlighted}
                       shouldUpdateCard={shouldUpdateCard}
                       updateCard={updateCard}
-                      setWhiteChoice={setWhiteChoice}
-                      setColorChoice={setColorChoice}
                     />
                   ) : (
                     <div
@@ -914,7 +917,15 @@ const ScoreCardLegendPenaltyRow = ({
   entries?: number[];
   marks?: Mark[];
   isMyCard?: boolean;
-  updateCard?: ({ color, boxIdx }: { color: string; boxIdx: number }) => void;
+  updateCard?: ({
+    color,
+    boxIdx,
+    dice,
+  }: {
+    color: string;
+    boxIdx: number;
+    dice: string;
+  }) => void;
   updatePenalty?: (penaltyIdx: number) => void;
 }) => {
   return (
@@ -1097,8 +1108,6 @@ const DicePopOver = ({
   shouldUpdateCard,
   marks,
   updateCard,
-  setWhiteChoice,
-  setColorChoice,
 }: {
   dice: Dice;
   color: string;
@@ -1113,9 +1122,15 @@ const DicePopOver = ({
     boxIdx: number;
   }) => boolean;
   marks?: Mark[];
-  updateCard: ({ color, boxIdx }: { color: string; boxIdx: number }) => void;
-  setWhiteChoice: Dispatch<SetStateAction<boolean>>;
-  setColorChoice: Dispatch<SetStateAction<boolean>>;
+  updateCard: ({
+    color,
+    boxIdx,
+    dice,
+  }: {
+    color: string;
+    boxIdx: number;
+    dice: string;
+  }) => void;
 }) => {
   const { whiteOne, whiteTwo } = dice;
   const coloredDice = dice[color as keyof typeof DiceColor];
@@ -1153,13 +1168,42 @@ const DicePopOver = ({
   }) => {
     if (diceColor === "white") {
       if (shouldUpdateCard({ box, boxIdx })) {
-        setWhiteChoice((prev) => !prev);
-        updateCard({ color: rowColor, boxIdx });
+        updateCard({ color: rowColor, boxIdx, dice: DiceSelect.white });
       }
     } else {
       if (shouldUpdateCard({ box, boxIdx })) {
-        setColorChoice((prev) => !prev);
-        updateCard({ color: rowColor, boxIdx });
+        updateCard({ color: rowColor, boxIdx, dice: DiceSelect.colored });
+      }
+    }
+  };
+
+  const buttonHighlightClasses = () => {
+    const matchedMark = marks?.find((m) =>
+      color === "red" || color === "yellow"
+        ? m[ColorRow[color as keyof typeof ColorRow]] === boxIdx + 2
+        : m[ColorRow[color as keyof typeof ColorRow]] === 12 - boxIdx
+    );
+    if (matchedMark?.dice === "white") {
+      return "bg-cyan-400 text-white animate-none";
+    }
+    if (matchedMark?.dice !== "white") {
+      const colorRowIdx = [
+        matchedMark?.redRow,
+        matchedMark?.yellowRow,
+        matchedMark?.blueRow,
+        matchedMark?.greenRow,
+      ].findIndex((m) => !!m);
+      if (colorRowIdx === 0) {
+        return highlightColor("redRow");
+      }
+      if (colorRowIdx === 1) {
+        return highlightColor("yellowRow");
+      }
+      if (colorRowIdx === 2) {
+        return highlightColor("blueRow");
+      }
+      if (colorRowIdx === 3) {
+        return highlightColor("greenRow");
       }
     }
   };
@@ -1170,13 +1214,7 @@ const DicePopOver = ({
         disabled={!isBoxHighlighted}
         className={joinClassNames(
           innerBoxColor(color),
-          marks?.find((m) =>
-            color === "red" || color === "yellow"
-              ? m[ColorRow[color as keyof typeof ColorRow]] === boxIdx + 2
-              : m[ColorRow[color as keyof typeof ColorRow]] === 12 - boxIdx
-          )
-            ? "border-slate-900 bg-cyan-300 text-white"
-            : "",
+          buttonHighlightClasses(),
           isBoxHighlighted ? "animate-pulse" : "",
           "flex h-full w-full items-center justify-center rounded-lg md:text-lg lg:text-2xl"
         )}
@@ -1192,14 +1230,14 @@ const DicePopOver = ({
         leaveFrom="transform scale-100 opacity-100"
         leaveTo="transform scale-95 opacity-0"
       >
-        <Menu.Items className="absolute z-50 mt-2 origin-top divide-y divide-gray-400 rounded-md bg-gray-400 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <Menu.Items className="absolute z-50 -ml-4 -mt-6 origin-top divide-y divide-gray-400 rounded-md bg-gray-400 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           {choiceList
             .filter((choice) => box === choice.diceOne + choice.diceTwo)
             .map((choice, choiceIdx) => (
               <Menu.Item key={choiceIdx}>
                 {({ close }) => (
                   <div
-                    className="flex justify-center gap-1 p-2 py-1 active:border-slate-900 active:bg-cyan-300"
+                    className="flex justify-center gap-1 p-2 py-1 hover:cursor-pointer active:border-slate-900 active:bg-cyan-300"
                     onClick={() => {
                       handleDiceSelect({
                         diceColor: choice.color,
@@ -1228,6 +1266,21 @@ const DicePopOver = ({
       </Transition>
     </Menu>
   );
+};
+
+const highlightColor = (rowColor: string) => {
+  switch (rowColor) {
+    case "redRow":
+      return "bg-red-300 animate-none text-red-700";
+    case "yellowRow":
+      return "bg-yellow-300 animate-none text-yellow-700";
+    case "greenRow":
+      return "bg-green-300 animate-none text-green-700";
+    case "blueRow":
+      return "bg-blue-300 animate-none text-blue-700";
+    default:
+      return "";
+  }
 };
 
 const colorSwitch = (color: string) => {
