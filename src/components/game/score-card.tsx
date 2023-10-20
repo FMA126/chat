@@ -1050,7 +1050,7 @@ const ScoreCardTotalRow = ({
   gameState?: string;
 }) => {
   return (
-    <div className="flex items-center justify-center gap-2 bg-gray-400 py-2">
+    <div className="flex items-center justify-center gap-2 bg-gray-400 p-2">
       <div className="">totals</div>
       <div
         className={joinClassNames(

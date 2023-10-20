@@ -62,6 +62,7 @@ model User {
     diceRolls     DiceRoll[]
     scoreCards    ScoreCard[]
     scoreCardEntries ScoreCardEntry[]
+    messages Message[]
 }
 
 model VerificationToken {
@@ -85,6 +86,7 @@ model Game {
   updatedAt DateTime @updatedAt
   diceRolls DiceRoll[]
   scoreCards ScoreCard[]
+  messages Message[]
 }
 
 model ScoreCard {
@@ -151,7 +153,21 @@ model DiceRoll {
     yellow Int
     blue Int
     game Game @relation(fields: [gameId], references: [id])
-    user         User     @relation(fields: [userId], references: [id])
+    user User @relation(fields: [userId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([gameId])
+    @@index([userId])
+}
+
+model Message {
+    id Int @id @default(autoincrement())
+    gameId Int
+    userId String
+    message String @db.Text
+    game Game @relation(fields: [gameId], references: [id])
+    user User @relation(fields: [userId], references: [id])
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 

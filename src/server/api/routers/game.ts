@@ -237,8 +237,7 @@ export const gameRouter = createTRPCRouter({
           data: dataMap,
         });
       }
-      // is the game over?
-      // the game is over if all players have marked for this diceroll and there are two locks or the fourth penalty box has been checked
+
       const game = await ctx.prisma.game.findFirst({
         where: { id: +gameId },
         include: {
@@ -366,5 +365,17 @@ export const gameRouter = createTRPCRouter({
         `new-score-card-entry:game:${gameId}`,
         { message: "new card entry" }
       );
+    }),
+  createMessage: protectedProcedure
+    .input(z.object({ gameId: z.string(), message: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const { gameId, message } = input;
+      return await ctx.prisma.message.create({
+        data: {
+          gameId: +gameId,
+          userId: ctx.session.user.id,
+          message,
+        },
+      });
     }),
 });

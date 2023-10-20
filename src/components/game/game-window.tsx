@@ -12,11 +12,13 @@ import { joinClassNames } from "~/utils/joinClassNames";
 import { GameLayout } from "../layout/game-layout";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDice } from "@fortawesome/free-solid-svg-icons";
+import { Chat } from "./chat";
 
 export const GameWindow = () => {
   const [cardView, setCardView] = useState("myCard");
   const session = useSession();
   const router = useRouter();
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const { data: game } = api.game.byId.useQuery(
     {
       id: router.query.gid as string,
@@ -34,9 +36,10 @@ export const GameWindow = () => {
     );
   return (
     <>
+      <Chat isChatOpen={isChatOpen} setIsChatOpen={setIsChatOpen} />
       <div className="flex h-screen flex-col">
         <div className="bg-blue-800">
-          <GameNav />
+          <GameNav setIsChatOpen={setIsChatOpen} />
         </div>
         <div className="flex flex-wrap justify-center bg-white/50 p-2">
           {game?.scoreCards?.map((card) => (
