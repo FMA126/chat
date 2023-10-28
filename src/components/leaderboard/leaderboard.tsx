@@ -29,7 +29,7 @@ export const LeaderBoard = () => {
           </thead>
           <tbody>
             {leaders.map((user, userIdx) => (
-              <tr key={userIdx} className="">
+              <tr key={userIdx} className="border-t border-t-white">
                 <td>{user.winnerName}</td>
                 <td>{`${user.countOf}`}</td>
               </tr>
