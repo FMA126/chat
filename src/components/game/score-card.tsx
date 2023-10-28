@@ -861,6 +861,7 @@ const ScoreCardRow = ({
                 <>
                   {dice && updateCard ? (
                     <DicePopOver
+                      isMyTurn={isMyTurn}
                       dice={dice}
                       box={box}
                       boxIdx={boxIdx}
@@ -1104,6 +1105,7 @@ const DicePopOver = ({
   color,
   box,
   boxIdx,
+  isMyTurn,
   isBoxHighlighted,
   shouldUpdateCard,
   marks,
@@ -1113,6 +1115,7 @@ const DicePopOver = ({
   color: string;
   box: number;
   boxIdx: number;
+  isMyTurn: boolean | undefined;
   isBoxHighlighted: boolean;
   shouldUpdateCard: ({
     box,
@@ -1134,11 +1137,13 @@ const DicePopOver = ({
 }) => {
   const { whiteOne, whiteTwo } = dice;
   const coloredDice = dice[color as keyof typeof DiceColor];
-  const choiceList = [
-    { diceOne: whiteOne, diceTwo: whiteTwo, color: "white" },
-    { diceOne: whiteOne, diceTwo: coloredDice, color },
-    { diceOne: whiteTwo, diceTwo: coloredDice, color },
-  ];
+  const choiceList = isMyTurn
+    ? [
+        { diceOne: whiteOne, diceTwo: whiteTwo, color: "white" },
+        { diceOne: whiteOne, diceTwo: coloredDice, color },
+        { diceOne: whiteTwo, diceTwo: coloredDice, color },
+      ]
+    : [{ diceOne: whiteOne, diceTwo: whiteTwo, color: "white" }];
 
   const diceNumber = (rolledNumber: number) => {
     switch (rolledNumber) {

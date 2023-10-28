@@ -43,7 +43,7 @@ export function GameNav({
           <span>Copy Game Link</span>
         </button>
       </div>
-      <div>
+      {/* <div>
         <button
           onClick={() => setIsChatOpen(true)}
           className="flex items-center gap-2 rounded-lg border-2 border-solid border-green-200 px-4 py-2 text-xs text-white active:bg-gray-200 md:text-base"
@@ -51,7 +51,7 @@ export function GameNav({
           <ChatBubbleBottomCenterIcon className="h-4 w-4" />
           <span>Chat</span>
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }

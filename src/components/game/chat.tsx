@@ -9,6 +9,7 @@ import {
   useRef,
 } from "react";
 import { api } from "~/utils/api";
+import { joinClassNames } from "~/utils/joinClassNames";
 
 export const Chat = ({
   isChatOpen,
@@ -21,6 +22,22 @@ export const Chat = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
   const { mutate } = api.game.createMessage.useMutation();
+
+  // const sendMessage = async () => {
+  //   if(!input) return
+  //   setIsLoading(true)
+
+  //   try {
+  //     await axios.post('/api/message/send', { text: input, chatId })
+  //     setInput('')
+  //     textareaRef.current?.focus()
+  //   } catch {
+  //     toast.error('Something went wrong. Please try again later.')
+  //   } finally {
+  //     setIsLoading(false)
+  //   }
+  // }
+
   return (
     <Transition appear show={isChatOpen} as={Fragment}>
       <Dialog
@@ -64,10 +81,7 @@ export const Chat = ({
                   </button>
                 </div>
                 <div className="mt-2">
-                  <p className="text-sm text-gray-500">
-                    Your payment has been successfully submitted. We’ve sent you
-                    an email with all of the details of your order.
-                  </p>
+                  <Messages />
                 </div>
 
                 <div className="mb-2 border-t border-gray-200 pt-4 sm:mb-0">
@@ -97,7 +111,7 @@ export const Chat = ({
                       </div>
                     </div>
 
-                    <div className="absolute bottom-0 right-0 flex justify-between py-2 pl-3 pr-2">
+                    <div className="absolute bottom-0 right-0 flex justify-between">
                       <div className="flex-shrink-0">
                         <button
                           type="button"
@@ -117,5 +131,22 @@ export const Chat = ({
         </div>
       </Dialog>
     </Transition>
+  );
+};
+
+const Messages = () => {
+  return (
+    <div className="rounded-xl border">
+      <div className={joinClassNames("flex justify-end p-1")}>
+        <div className="rounded-xl bg-green-400 p-1 shadow-lg">
+          <div>Merritt</div>
+          <div>Hey whats up</div>
+        </div>
+      </div>
+      <div className="rounded-xl bg-gray-100 p-1 shadow-lg">
+        <div>Brooke</div>
+        <div>Hi</div>
+      </div>
+    </div>
   );
 };
