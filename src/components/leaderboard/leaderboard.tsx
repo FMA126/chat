@@ -6,7 +6,14 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 export const LeaderBoard = () => {
   const router = useRouter();
   const { data: leaders } = api.leaderBoard.getLeaderBoard.useQuery();
-  if (!leaders) return <div>...loading</div>;
+  if (!leaders)
+    return (
+      <GameLayout>
+        <div className="flex min-h-screen items-center justify-center text-white">
+          ...loading
+        </div>
+      </GameLayout>
+    );
   return (
     <GameLayout>
       <div className="p-2 text-white">
