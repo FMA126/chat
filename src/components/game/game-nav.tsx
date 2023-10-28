@@ -10,8 +10,10 @@ import toast from "react-hot-toast";
 
 export function GameNav({
   setIsChatOpen,
+  setIsTutorialOpen,
 }: {
   setIsChatOpen: Dispatch<SetStateAction<boolean>>;
+  setIsTutorialOpen: Dispatch<SetStateAction<boolean>>;
 }) {
   const router = useRouter();
 
@@ -24,6 +26,10 @@ export function GameNav({
       }` + router.asPath
     );
     toast.success("Game link copied!");
+  };
+
+  const handleHowToPlay = () => {
+    setIsTutorialOpen((prev) => !prev);
   };
   return (
     <div className="flex justify-center gap-4 p-1 md:p-2">
@@ -41,6 +47,15 @@ export function GameNav({
         >
           <ClipboardDocumentIcon className="h-4 w-4" />
           <span>Copy Game Link</span>
+        </button>
+      </div>
+      <div>
+        <button
+          onClick={() => void handleHowToPlay()}
+          className="flex items-center gap-2 rounded-lg border-2 border-solid border-green-200 px-4 py-2 text-xs text-white active:bg-gray-200 md:text-base"
+        >
+          <ClipboardDocumentIcon className="h-4 w-4" />
+          <span>Game Rules</span>
         </button>
       </div>
       {/* <div>
