@@ -1,7 +1,5 @@
-import { api } from "~/utils/api";
+import { LeaderBoard } from "~/components/leaderboard/leaderboard";
 
 export default function NewGame() {
-  // const hello = api.example.hello.useQuery({ text: "from tRPC" });
-
-  return <div>Leaderboard</div>;
+  return <LeaderBoard />;
 }

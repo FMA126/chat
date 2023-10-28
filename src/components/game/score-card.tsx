@@ -79,7 +79,6 @@ enum PenaltyRow {
 }
 
 // Todo
-// Player only able to select one color and one white on own roll
 // leaderboard
 
 // Nice to haves
