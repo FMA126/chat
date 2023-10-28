@@ -19,7 +19,7 @@ export const LeaderBoard = () => {
         </button>
       </div>
       <div className="flex flex-col items-center text-white">
-        <h2 className="text-center">LeaderBoard</h2>
+        <h2 className="text-bold mb-2 text-center text-2xl">Leader Board</h2>
         <table className="min-w-[50vw] text-center">
           <thead>
             <tr className="">
