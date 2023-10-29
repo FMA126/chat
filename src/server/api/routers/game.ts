@@ -366,16 +366,33 @@ export const gameRouter = createTRPCRouter({
         { message: "new card entry" }
       );
     }),
+  getMessages: protectedProcedure
+    .input(z.object({ gameId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const { gameId } = input;
+      return await ctx.prisma.message.findMany({
+        where: { gameId: +gameId },
+        include: { user: true },
+      });
+    }),
   createMessage: protectedProcedure
     .input(z.object({ gameId: z.string(), message: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const { gameId, message } = input;
-      return await ctx.prisma.message.create({
+      const messageRes = await ctx.prisma.message.create({
         data: {
           gameId: +gameId,
           userId: ctx.session.user.id,
           message,
         },
       });
+      await pusherServerClient.trigger(
+        `chat`,
+        `new-message:game:${input.gameId}`,
+        {
+          message: "new message",
+        }
+      );
+      return messageRes;
     }),
 });

@@ -9,12 +9,13 @@ import { GameLayout } from "~/components/layout/game-layout";
 import toast from "react-hot-toast";
 import { joinClassNames } from "~/utils/joinClassNames";
 import { usePusher } from "~/lib/usePusherClient";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Game() {
   const router = useRouter();
   const pusher = usePusher();
   const utils = api.useContext();
+  const [unseenMessages, setUnseenMessages] = useState<boolean>(false);
   const {
     data: game,
     isFetchedAfterMount,
@@ -53,7 +54,12 @@ export default function Game() {
 
   useEffect(() => {
     async function updateGame(data: { message: string }) {
-      await utils.game.invalidate();
+      if (data.message === "new message") {
+        await utils.game.getMessages.invalidate();
+        setUnseenMessages(true);
+      } else {
+        await utils.game.invalidate();
+      }
     }
 
     const channel = game?.id && pusher.subscribe(`chat`);
@@ -61,12 +67,14 @@ export default function Game() {
     channel && channel.bind(`player-joined:game:${game.id}`, updateGame);
     channel && channel.bind(`new-dice-roll:game:${game.id}`, updateGame);
     channel && channel.bind(`new-score-card-entry:game:${game.id}`, updateGame);
+    channel && channel?.bind(`new-message:game:${game.id}`, updateGame);
 
     return () => {
       channel && channel.unbind(`player-joined:game:${game.id}`, updateGame);
       channel && channel.unbind(`new-dice-roll:game:${game.id}`, updateGame);
       channel &&
         channel.unbind(`new-score-card-entry:game:${game.id}`, updateGame);
+      channel && channel?.unbind(`new-message:game:${game.id}`, updateGame);
       pusher.unsubscribe("chat");
     };
   }, [pusher, game?.id, refetchGame]);
@@ -118,7 +126,10 @@ export default function Game() {
   return (
     <>
       <GameLayout>
-        <GameWindow />
+        <GameWindow
+          setUnseenMessages={setUnseenMessages}
+          unseenMessages={unseenMessages}
+        />
       </GameLayout>
     </>
   );

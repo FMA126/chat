@@ -1,5 +1,4 @@
-import { Dialog, Transition } from "@headlessui/react";
-import { PaperAirplaneIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import TextareaAutosize from "react-textarea-autosize";
 import {
   type Dispatch,
@@ -12,75 +11,130 @@ import {
 import { api } from "~/utils/api";
 import { joinClassNames } from "~/utils/joinClassNames";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
+import { format } from "date-fns";
+import { usePusher } from "~/lib/usePusherClient";
+import { LoaderIcon } from "react-hot-toast";
 
 export const Chat = ({
-  isChatOpen,
-  setIsChatOpen,
+  setUnseenMessages,
 }: {
-  isChatOpen: boolean;
-  setIsChatOpen: Dispatch<SetStateAction<boolean>>;
+  setUnseenMessages: Dispatch<SetStateAction<boolean>>;
 }) => {
   const router = useRouter();
+  const session = useSession();
+  const utils = api.useContext();
+  const pusher = usePusher();
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isPostingMessage, setIsPostingMessage] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
-  const { mutate } = api.game.createMessage.useMutation();
 
-  // const sendMessage = async () => {
-  //   if(!input) return
-  //   setIsLoading(true)
+  const { data: game } = api.game.byId.useQuery(
+    { id: router.query.gid as string },
+    { enabled: !!router.query.gid }
+  );
 
-  //   try {
-  //     await axios.post('/api/message/send', { text: input, chatId })
-  //     setInput('')
-  //     textareaRef.current?.focus()
-  //   } catch {
-  //     toast.error('Something went wrong. Please try again later.')
-  //   } finally {
-  //     setIsLoading(false)
-  //   }
-  // }
+  const { data: messages } = api.game.getMessages.useQuery(
+    { gameId: router.query.gid as string },
+    { enabled: !!router.query.gid }
+  );
+  const { mutate } = api.game.createMessage.useMutation({
+    onMutate() {
+      setIsPostingMessage(true);
+    },
+    async onSettled() {
+      await utils.game.getMessages.invalidate();
+      setIsPostingMessage(false);
+      setInput("");
+    },
+  });
 
-  const sendMessage = () => {
+  const sendMessage = (input: string) => {
     mutate({ message: input, gameId: router.query.gid as string });
   };
 
+  const scrollToBottom = () => {
+    void messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
+  };
+
   useEffect(() => {
+    scrollToBottom();
     textareaRef.current?.focus();
-  }, []);
+    setUnseenMessages(false);
+  }, [messages]);
 
   return (
-    <div className="rounded-xl bg-white">
-      <div className="rounded-xl border">
-        <div className={joinClassNames("flex justify-end p-1")}>
-          <div className="rounded-xl bg-gray-100 p-1 shadow-lg">
-            <div>Merritt</div>
-            <div>Hey whats up</div>
+    <div className="flex h-[70vh] flex-col rounded-xl bg-white">
+      <div className="max-h-[95%] overflow-auto rounded-xl border">
+        {messages?.map((message, messageIdx) => (
+          <div
+            key={messageIdx}
+            className={joinClassNames(
+              message.userId === session.data?.user.id
+                ? "justify-end"
+                : "justify-start",
+              "flex p-1"
+            )}
+          >
+            <div
+              className={joinClassNames(
+                message.userId === session.data?.user.id
+                  ? "bg-gray-100"
+                  : "bg-green-400",
+                "max-w-[70vw] rounded-xl p-1 shadow-lg"
+              )}
+            >
+              <div className="flex items-baseline gap-1">
+                <div
+                  className={joinClassNames(
+                    message.userId === session.data?.user.id
+                      ? "text-gray-500"
+                      : "text-green-800"
+                  )}
+                >
+                  {message.user.name}
+                </div>
+                <div
+                  className={joinClassNames(
+                    message.userId === session.data?.user.id
+                      ? "text-gray-300"
+                      : "text-green-700",
+                    "text-xs"
+                  )}
+                >
+                  {format(new Date(message.createdAt), "p")}
+                </div>
+              </div>
+              <div className="flex max-w-full flex-wrap hyphens-auto p-2">
+                {message.message}
+              </div>
+            </div>
           </div>
-        </div>
-        <div className={joinClassNames("flex justify-start p-1")}>
-          <div className="rounded-xl bg-green-400 p-1 shadow-lg">
-            <div>Brooke</div>
-            <div>Hi</div>
-          </div>
-        </div>
+        ))}
+        <div ref={messagesEndRef} />
       </div>
 
-      <div className="flex">
+      <div className="flex grow bg-gray-50">
         <div className="grow pt-1">
           <TextareaAutosize
             ref={textareaRef}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                sendMessage();
+                sendMessage(input);
               }
             }}
             rows={1}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={`Message`}
-            className="w-full border-0 bg-white/0 pl-1 text-xl ring-0 focus:border-0 focus:outline-none"
+            disabled={isPostingMessage}
+            className={joinClassNames(
+              isPostingMessage ? "text-gray-400" : "",
+              "w-full border-0 bg-white/0 pl-1 text-xl ring-0 focus:border-0 focus:outline-none"
+            )}
           />
         </div>
 
@@ -88,10 +142,19 @@ export const Chat = ({
           <button
             type="button"
             className="inline-flex items-center justify-center rounded-md border border-transparent bg-green-100 px-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
-            onClick={() => setIsChatOpen(false)}
+            onClick={() => sendMessage(input)}
+            disabled={isPostingMessage}
           >
-            <PaperAirplaneIcon className="h-4 w-4" />
-            <span>Send</span>
+            {isPostingMessage ? (
+              <>
+                <LoaderIcon className="animate spin h-4 w-4" />
+              </>
+            ) : (
+              <>
+                <PaperAirplaneIcon className="h-4 w-4" />
+                <span>Send</span>
+              </>
+            )}
           </button>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { type Dispatch, type SetStateAction, useMemo, useState } from "react";
 import { DiceRoll } from "./dice-roll";
 import { GameNav } from "./game-nav";
 import { ScoreCardViewSelect } from "./score-card-view-select";
@@ -15,7 +15,13 @@ import { faDice } from "@fortawesome/free-solid-svg-icons";
 import { Chat } from "./chat";
 import { Tutorial } from "./tutorial";
 
-export const GameWindow = () => {
+export const GameWindow = ({
+  unseenMessages,
+  setUnseenMessages,
+}: {
+  unseenMessages: boolean;
+  setUnseenMessages: Dispatch<SetStateAction<boolean>>;
+}) => {
   const [cardView, setCardView] = useState("myCard");
   const session = useSession();
   const router = useRouter();
@@ -86,7 +92,10 @@ export const GameWindow = () => {
           </div>
         )}
         <div className="">
-          <ScoreCardViewSelect setCardView={setCardView} />
+          <ScoreCardViewSelect
+            unseenMessages={unseenMessages}
+            setCardView={setCardView}
+          />
         </div>
         <div className="grow py-2 sm:px-2">
           {cardView === "myCard" && (
@@ -102,9 +111,7 @@ export const GameWindow = () => {
             </div>
           )}
           {cardView === "chat" && (
-            <div className="max-h-[60vh] overflow-auto">
-              <Chat isChatOpen={isChatOpen} setIsChatOpen={setIsChatOpen} />
-            </div>
+            <Chat setUnseenMessages={setUnseenMessages} />
           )}
         </div>
       </div>
