@@ -67,7 +67,7 @@ export const Chat = ({
 
   return (
     <div className="flex h-[70vh] flex-col rounded-xl bg-white">
-      <div className="max-h-[95%] overflow-auto rounded-xl border">
+      <div className="basis-[95%] overflow-auto rounded-xl border">
         {messages?.map((message, messageIdx) => (
           <div
             key={messageIdx}

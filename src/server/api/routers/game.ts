@@ -370,10 +370,11 @@ export const gameRouter = createTRPCRouter({
     .input(z.object({ gameId: z.string() }))
     .query(async ({ input, ctx }) => {
       const { gameId } = input;
-      return await ctx.prisma.message.findMany({
+      const messages = await ctx.prisma.message.findMany({
         where: { gameId: +gameId },
         include: { user: true },
       });
+      return messages ?? [];
     }),
   createMessage: protectedProcedure
     .input(z.object({ gameId: z.string(), message: z.string() }))
