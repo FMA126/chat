@@ -45,10 +45,7 @@ export const GameWindow = () => {
       />
       <div className="flex h-screen flex-col">
         <div className="bg-blue-800">
-          <GameNav
-            setIsChatOpen={setIsChatOpen}
-            setIsTutorialOpen={setIsTutorialOpen}
-          />
+          <GameNav setIsTutorialOpen={setIsTutorialOpen} />
         </div>
         <div className="flex flex-wrap justify-center bg-white/50 p-2">
           {game?.scoreCards?.map((card) => (
@@ -92,15 +89,21 @@ export const GameWindow = () => {
           <ScoreCardViewSelect setCardView={setCardView} />
         </div>
         <div className="grow py-2 sm:px-2">
-          {cardView === "myCard" ? (
+          {cardView === "myCard" && (
             <ScoreCard
               playerName={session?.data?.user?.name ?? "no name"}
               playerId={session?.data?.user?.id ?? "-1"}
               isMyCard={true}
             />
-          ) : (
+          )}
+          {cardView === "players" && (
             <div className="max-h-[60vh] overflow-auto">
               <PlayersScoreCards />
+            </div>
+          )}
+          {cardView === "chat" && (
+            <div className="max-h-[60vh] overflow-auto">
+              <Chat isChatOpen={isChatOpen} setIsChatOpen={setIsChatOpen} />
             </div>
           )}
         </div>

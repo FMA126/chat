@@ -1214,60 +1214,62 @@ const DicePopOver = ({
 
   return (
     <Menu>
-      <Menu.Button
-        disabled={!isBoxHighlighted}
-        className={joinClassNames(
-          innerBoxColor(color),
-          buttonHighlightClasses(),
-          isBoxHighlighted ? "animate-pulse" : "",
-          "flex h-full w-full items-center justify-center rounded-lg md:text-lg lg:text-2xl"
-        )}
-      >
-        {box}
-      </Menu.Button>
-      <Transition
-        as={Fragment}
-        enter="transition duration-100 ease-out"
-        enterFrom="transform scale-95 opacity-0"
-        enterTo="transform scale-100 opacity-100"
-        leave="transition duration-75 ease-out"
-        leaveFrom="transform scale-100 opacity-100"
-        leaveTo="transform scale-95 opacity-0"
-      >
-        <Menu.Items className="absolute z-50 -ml-4 -mt-6 origin-top divide-y divide-gray-400 rounded-md bg-gray-400 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          {choiceList
-            .filter((choice) => box === choice.diceOne + choice.diceTwo)
-            .map((choice, choiceIdx) => (
-              <Menu.Item key={choiceIdx}>
-                {({ close }) => (
-                  <div
-                    className="flex justify-center gap-1 p-2 py-1 hover:cursor-pointer active:border-slate-900 active:bg-cyan-300"
-                    onClick={() => {
-                      handleDiceSelect({
-                        diceColor: choice.color,
-                        rowColor: color,
-                      });
-                      close();
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon={diceNumber(choice.diceOne)}
-                      className="h-8 w-8 bg-black text-white sm:h-10 sm:w-10"
-                    />
-                    <FontAwesomeIcon
-                      icon={diceNumber(choice.diceTwo)}
-                      className={joinClassNames(
-                        diceColor(choice.color),
-                        choice.color === "white" ? "bg-black" : "bg-white",
-                        "h-8 w-8 sm:h-10 sm:w-10"
-                      )}
-                    />
-                  </div>
-                )}
-              </Menu.Item>
-            ))}
-        </Menu.Items>
-      </Transition>
+      <div className="relative">
+        <Menu.Button
+          disabled={!isBoxHighlighted}
+          className={joinClassNames(
+            innerBoxColor(color),
+            buttonHighlightClasses(),
+            isBoxHighlighted ? "animate-pulse" : "",
+            "flex h-full w-full items-center justify-center rounded-lg md:text-lg lg:text-2xl"
+          )}
+        >
+          {box}
+        </Menu.Button>
+        <Transition
+          as={Fragment}
+          enter="transition duration-100 ease-out"
+          enterFrom="transform scale-95 opacity-0"
+          enterTo="transform scale-100 opacity-100"
+          leave="transition duration-75 ease-out"
+          leaveFrom="transform scale-100 opacity-100"
+          leaveTo="transform scale-95 opacity-0"
+        >
+          <Menu.Items className="absolute z-50 -ml-4 -mt-6 origin-top divide-y divide-gray-400 rounded-md bg-gray-400 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+            {choiceList
+              .filter((choice) => box === choice.diceOne + choice.diceTwo)
+              .map((choice, choiceIdx) => (
+                <Menu.Item key={choiceIdx}>
+                  {({ close }) => (
+                    <div
+                      className="flex justify-center gap-1 p-2 py-1 hover:cursor-pointer active:border-slate-900 active:bg-cyan-300"
+                      onClick={() => {
+                        handleDiceSelect({
+                          diceColor: choice.color,
+                          rowColor: color,
+                        });
+                        close();
+                      }}
+                    >
+                      <FontAwesomeIcon
+                        icon={diceNumber(choice.diceOne)}
+                        className="h-8 w-8 bg-black text-white sm:h-10 sm:w-10"
+                      />
+                      <FontAwesomeIcon
+                        icon={diceNumber(choice.diceTwo)}
+                        className={joinClassNames(
+                          diceColor(choice.color),
+                          choice.color === "white" ? "bg-black" : "bg-white",
+                          "h-8 w-8 sm:h-10 sm:w-10"
+                        )}
+                      />
+                    </div>
+                  )}
+                </Menu.Item>
+              ))}
+          </Menu.Items>
+        </Transition>
+      </div>
     </Menu>
   );
 };
