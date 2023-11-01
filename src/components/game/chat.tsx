@@ -31,11 +31,6 @@ export const Chat = ({
   const [isPostingMessage, setIsPostingMessage] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
 
-  const { data: game } = api.game.byId.useQuery(
-    { id: router.query.gid as string },
-    { enabled: !!router.query.gid }
-  );
-
   const { data: messages } = api.game.getMessages.useQuery(
     { gameId: router.query.gid as string },
     { enabled: !!router.query.gid }
