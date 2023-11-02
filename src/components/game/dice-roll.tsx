@@ -199,7 +199,7 @@ export function DiceRoll({
         </h2>
         {!game?.playerTwo ? (
           <div>Waiting for other players</div>
-        ) : (
+        ) : game.playerOne === session.data?.user.id ? (
           <button
             className="rounded-lg border-2 border-solid bg-cyan-300 px-4 py-2 text-cyan-900"
             onClick={handleRollDice}
@@ -211,6 +211,8 @@ export function DiceRoll({
             />
             <span>Roll</span>
           </button>
+        ) : (
+          <div>Waiting for player 1 to roll</div>
         )}
       </div>
     );
