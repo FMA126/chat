@@ -7,7 +7,7 @@ import { PlayersScoreCards } from "./players-score-cards";
 import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { CheckBadgeIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import { joinClassNames } from "~/utils/joinClassNames";
 import { GameLayout } from "../layout/game-layout";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -71,7 +71,17 @@ export const GameWindow = ({
               )}
             >
               {game?.diceRolls[0]?.userId === card.user.id ? (
-                <FontAwesomeIcon icon={faDice} />
+                card.scoreCardEntries.find(
+                  (entry) => entry.diceRollId === game?.diceRolls[0]?.id
+                ) ? (
+                  <CheckBadgeIcon className="h-4 w-4 text-green-900" />
+                ) : (
+                  <FontAwesomeIcon icon={faDice} />
+                )
+              ) : card.scoreCardEntries.find(
+                  (entry) => entry.diceRollId === game?.diceRolls[0]?.id
+                ) ? (
+                <CheckBadgeIcon className="h-4 w-4 text-green-900" />
               ) : (
                 <UserCircleIcon className="h-4 w-4" />
               )}
