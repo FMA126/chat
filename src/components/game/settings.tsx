@@ -30,8 +30,9 @@ export const Settings = ({
     },
     async onSettled() {
       await utils.game.invalidate();
+      await utils.settings.invalidate();
       await session.update();
-      toast("updated user name");
+      toast.success("updated user name");
       setIsSubmitting(false);
       setShowEditName(false);
     },
@@ -104,7 +105,10 @@ export const Settings = ({
                               name="userName"
                               id="userName"
                               autoComplete="user-name"
-                              placeholder={data.userName ?? ""}
+                              placeholder={
+                                utils.settings.getUserName.getData()
+                                  ?.userName ?? ""
+                              }
                               className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             />
                           </div>
