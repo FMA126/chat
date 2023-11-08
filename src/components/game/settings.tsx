@@ -10,6 +10,7 @@ import {
 } from "react";
 import { api } from "~/utils/api";
 import Spinner from "../shared/spinner";
+import toast from "react-hot-toast";
 
 export const Settings = ({
   showEditName,
@@ -30,6 +31,7 @@ export const Settings = ({
     async onSettled() {
       await utils.game.invalidate();
       await session.update();
+      toast("updated user name");
       setIsSubmitting(false);
       setShowEditName(false);
     },
