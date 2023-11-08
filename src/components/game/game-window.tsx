@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDice } from "@fortawesome/free-solid-svg-icons";
 import { Chat } from "./chat";
 import { Tutorial } from "./tutorial";
+import { Settings } from "./settings";
 
 export const GameWindow = ({
   unseenMessages,
@@ -27,6 +28,7 @@ export const GameWindow = ({
   const router = useRouter();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+  const [showEditName, setShowEditName] = useState(false);
   const { data: game } = api.game.byId.useQuery(
     {
       id: router.query.gid as string,
@@ -49,9 +51,13 @@ export const GameWindow = ({
         isTutorialOpen={isTutorialOpen}
         setIsTutorialOpen={setIsTutorialOpen}
       />
+      <Settings showEditName={showEditName} setShowEditName={setShowEditName} />
       <div className="flex h-screen flex-col">
         <div className="bg-blue-800">
-          <GameNav setIsTutorialOpen={setIsTutorialOpen} />
+          <GameNav
+            setIsTutorialOpen={setIsTutorialOpen}
+            setShowEditName={setShowEditName}
+          />
         </div>
         <div className="flex flex-wrap justify-center bg-white/50 p-2">
           {game?.scoreCards?.map((card) => (

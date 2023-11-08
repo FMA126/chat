@@ -79,10 +79,8 @@ enum PenaltyRow {
 }
 
 // Todo
-// leaderboard
 
 // Nice to haves
-// chat??
 // ui improvements
 // animations
 
@@ -496,6 +494,7 @@ export const ScoreCard = ({
                 <UserIcon className="h-6 w-6" />
                 <span>{playerName ?? "no name"}</span>
               </div>
+
               <div className="w-1/6 rounded-t-lg border-l-2 border-r-2 border-t-2 border-black">
                 At least 5 X&apos;s
               </div>

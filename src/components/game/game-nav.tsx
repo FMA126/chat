@@ -4,6 +4,8 @@ import {
   ChatBubbleBottomCenterIcon,
   ChevronDownIcon,
   ClipboardDocumentIcon,
+  Cog6ToothIcon,
+  Cog8ToothIcon,
   PlusIcon,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/solid";
@@ -15,8 +17,10 @@ import toast from "react-hot-toast";
 
 export function GameNav({
   setIsTutorialOpen,
+  setShowEditName,
 }: {
   setIsTutorialOpen: Dispatch<SetStateAction<boolean>>;
+  setShowEditName: Dispatch<SetStateAction<boolean>> | undefined;
 }) {
   const router = useRouter();
 
@@ -100,6 +104,18 @@ export function GameNav({
                             <span>Game Rules</span>
                           </button>
                         </div>
+                        <div>
+                          <button
+                            onClick={() =>
+                              setShowEditName &&
+                              setShowEditName((prev) => !prev)
+                            }
+                            className="flex items-center gap-2 px-4 py-2 active:bg-gray-200"
+                          >
+                            <Cog8ToothIcon className="h-4 w-4" />
+                            <span>Settings</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </Popover.Panel>
@@ -144,15 +160,15 @@ export function GameNav({
             <span>Game Rules</span>
           </button>
         </div>
-        {/* <div>
-        <button
-          onClick={() => setIsChatOpen(true)}
-          className="flex items-center gap-2 rounded-lg border-2 border-solid border-green-200 px-4 py-2 text-xs text-white active:bg-gray-200 md:text-base"
-        >
-          <ChatBubbleBottomCenterIcon className="h-4 w-4" />
-          <span>Chat</span>
-        </button>
-      </div> */}
+        <div>
+          <button
+            onClick={() => setShowEditName && setShowEditName((prev) => !prev)}
+            className="flex items-center gap-2 rounded-lg border-2 border-solid border-green-200 px-4 py-2 text-xs text-white active:bg-gray-200 md:text-base"
+          >
+            <Cog6ToothIcon className="h-4 w-4" />
+            <span>Settings</span>
+          </button>
+        </div>
       </div>
     </div>
   );
