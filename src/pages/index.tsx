@@ -25,7 +25,7 @@ export default function Home() {
               >
                 <h3 className="text-2xl font-bold">New Game →</h3>
                 <div className="text-lg">
-                  Start a new game of Qwixx with your friends.
+                  Start a new game of Qwixx with 2-5 of your friends.
                 </div>
               </Link>
               <Link

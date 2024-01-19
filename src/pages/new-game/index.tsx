@@ -77,7 +77,7 @@ export default function NewGame() {
         >
           Start Game
         </button>
-        {isGameLoading ? <div>loading...</div> : <div>{gameData?.id}</div>}
+        {isGameLoading ? <div>loading...</div> : <div></div>}
       </div>
     </GameLayout>
   );
